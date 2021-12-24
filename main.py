@@ -76,12 +76,12 @@ class Hero(pygame.sprite.Sprite):
             self.yvel = -self.speed
         if pygame.key.get_pressed()[pygame.K_s]:
             self.yvel = self.speed
-        if not (pygame.key.get_pressed()[pygame.K_w] or pygame.key.get_pressed()[pygame.K_s]):
-            self.yvel = 0
         if pygame.key.get_pressed()[pygame.K_a]:
             self.xvel = -self.speed
         if pygame.key.get_pressed()[pygame.K_d]:
             self.xvel = self.speed
+        if not (pygame.key.get_pressed()[pygame.K_w] or pygame.key.get_pressed()[pygame.K_s]):
+            self.yvel = 0
         if not (pygame.key.get_pressed()[pygame.K_d] or pygame.key.get_pressed()[pygame.K_a]):
             self.xvel = 0
 
