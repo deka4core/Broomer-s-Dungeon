@@ -1,7 +1,5 @@
 import pygame.mixer
 
-pygame.init()
-
 """
                     Импорт звуков
 """

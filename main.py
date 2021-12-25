@@ -5,12 +5,12 @@ import pytmx
 import menu
 from constants import *
 
-all_entities = pygame.sprite.Group()
-borders = pygame.sprite.Group()
+all_entities = pygame.sprite.Group()  # группа всех живых объектов
+borders = pygame.sprite.Group()  # группа границ
 
 
 # Загрузка изображения
-def load_image(name, colorkey=None):
+def load_image(name):
     fullname = os.path.join('data', name)
     if not os.path.isfile(fullname):
         print(f"Файл с изображением '{fullname}' не найден")
@@ -19,14 +19,22 @@ def load_image(name, colorkey=None):
     return image
 
 
-class BorderTile(pygame.sprite.Sprite):
-    def __init__(self, position):
+class Tile(pygame.sprite.Sprite):
+    """           Класс тайла                """
+    def __init__(self, position, borders):
         super().__init__(borders)
         self.x, self.y = position
         self.rect = pygame.Rect(self.x, self.y, TILE_SIZE, TILE_SIZE)
 
 
+class BorderTile(Tile):
+    """    Класс тайла на который нельзя наступать       """
+    def __init__(self, position):
+        super().__init__(position, borders)
+
+
 class Map:
+    """                 Класс карты                       """
     def __init__(self, filename, free_tiles):
         self.map = pytmx.load_pygame(f'{MAPS_DIR}/{filename}')
         self.height = self.map.height
@@ -35,13 +43,15 @@ class Map:
         self.free_tiles = free_tiles
         self.add_borders()
 
+    # Вывод карты из файла .tmx на экран
     def render(self, screen):
         for y in range(self.height):
             for x in range(self.width):
                 image = self.map.get_tile_image(x, y, layer=0)
-                image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
+                image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))  # Изменяем размер тайла
                 screen.blit(image, (x * TILE_SIZE, y * TILE_SIZE))
 
+    # узнаем ID тайла из тайлсета
     def get_tile_id(self, position):
         return self.map.tiledgidmap[self.map.get_tile_gid(*position, layer=0)]
 
