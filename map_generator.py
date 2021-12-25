@@ -18,8 +18,14 @@ def start():
     newRoom = Room((20, 10), ROOM_MAPS[2])
     spawned_rooms[3][3] = (newRoom, 3 * TILE_SIZE * 20, 3 * TILE_SIZE * 10)
 
-    for i in range(7):
+    for i in range(5):
         place_one_room()
+
+    for x in range(len(spawned_rooms)):
+        for y in range(len(spawned_rooms[0])):
+            if spawned_rooms[x][y] != 0:
+                room = spawned_rooms[x][y][0]
+                connect_room(room, (x, y))
 
 
 def place_one_room():
@@ -53,10 +59,10 @@ class Room:
     def __init__(self, size, map):
         self.x, self.y = size
         self.map = map
-        self.DoorU = (8, 0, False)
-        self.DoorR = (19, 3, False)
-        self.DoorD = (8, 9, False)
-        self.DoorL = (0, 3, False)
+        self.DoorU = [8, 0, False]
+        self.DoorR = [19, 3, False]
+        self.DoorD = [8, 9, False]
+        self.DoorL = [0, 3, False]
 
 
 def connect_room(room, position):
@@ -66,36 +72,44 @@ def connect_room(room, position):
 
     neighbours = list()
 
-    if room.DoorU[-1] == False and room_y < max_y and spawned_rooms[room_x][room_y + 1][0].DoorD[-1] == False:
+    if room.DoorU[-1] == False and room_y < max_y and spawned_rooms[room_x][room_y + 1] != 0 and \
+            spawned_rooms[room_x][room_y + 1][0].DoorD[-1] == False:
         neighbours.append(1)
-    if room.DoorD[-1] == False and room_y > 0 and spawned_rooms[room_x][room_y - 1][0].DoorU[-1] == False:
+    if room.DoorD[-1] == False and room_y > 0 and spawned_rooms[room_x][room_y - 1] != 0 and \
+            spawned_rooms[room_x][room_y - 1][0].DoorU[-1] == False:
         neighbours.append(2)
-    if room.DoorR[-1] == False and room_x < max_x and spawned_rooms[room_x][room_y + 1][0].DoorL[-1] == False:
+    if room.DoorR[-1] == False and room_x < max_y and spawned_rooms[room_x + 1][room_y] != 0 and \
+            spawned_rooms[room_x + 1][room_y][0].DoorL[-1] == False:
         neighbours.append(3)
-    if room.DoorL[-1] == False and room_x > 0 and spawned_rooms[room_x][room_y - 1][0].DoorR[-1] == False:
+    if room.DoorL[-1] == False and room_x > 0 and spawned_rooms[room_x - 1][room_y] != 0 and \
+            spawned_rooms[room_x - 1][room_y][0].DoorR[-1] == False:
         neighbours.append(4)
 
-    select_direction = neighbours[random.randint(0, len(neighbours) - 1)]
-
-    if select_direction == 1:
-        room.DoorU[-1] = True
-        spawned_rooms[room_x][room_y + 1][0].DoorD[-1] = True
-    elif select_direction == 2:
-        room.DoorD[-1] = True
-        spawned_rooms[room_x][room_y + 1][0].DoorU[-1] = True
-    elif select_direction == 4:
-        room.DoorL[-1] = True
-        spawned_rooms[room_x][room_y + 1][0].DoorR[-1] = True
-    elif select_direction == 3:
-        room.DoorR[-1] = True
-        spawned_rooms[room_x][room_y + 1][0].DoorL[-1] = True
-
+    if neighbours:
+        for select_direction in neighbours:
+            if select_direction == 1:
+                room.DoorD[-1] = True
+                room_n = spawned_rooms[room_x][room_y + 1]
+                if room_n != 0:
+                    room_n[0].DoorU[-1] = True
+            elif select_direction == 2:
+                room.DoorU[-1] = True
+                room_n = spawned_rooms[room_x][room_y - 1]
+                if room_n != 0:
+                    room_n[0].DoorD[-1] = True
+            elif select_direction == 3:
+                room.DoorR[-1] = True
+                room_n = spawned_rooms[room_x + 1][room_y]
+                if room_n != 0:
+                    room_n[0].DoorL[-1] = True
+            elif select_direction == 4:
+                room.DoorL[-1] = True
+                room_n = spawned_rooms[room_x - 1][room_y]
+                if room_n != 0:
+                    room_n[0].DoorR[-1] = True
 
 
 start()
-
-
-
 
 
 class Tile(pygame.sprite.Sprite):
@@ -137,7 +151,6 @@ class Map:
                 if item != 0:
                     map_class, map_x, map_y = item
                     dup, ddown, dleft, dright = map_class.DoorU, map_class.DoorD, map_class.DoorL, map_class.DoorR
-                    print(dup, ddown, dleft, dright)
                     map = map_class.map
                     for y in range(map.height):
                         for x in range(map.width):
@@ -145,13 +158,13 @@ class Map:
                                     (ddown[-1] and x == ddown[0] and y == ddown[1]) or \
                                     (dleft[-1] and x == dleft[0] and y == dleft[1]) or \
                                     (dright[-1] and x == dright[0] and y == dright[1]):
-                                print(1)
-                                image = map.get_tile_image_by_gid(34)
+                                image = map.get_tile_image(2, 2, layer=0)
+                                image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
+                                Tile((x * TILE_SIZE + map_x, y * TILE_SIZE + map_y), image)
                             else:
                                 image = map.get_tile_image(x, y, layer=0)
-
-                            image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
-                            if not self.is_free((x, y), map):
-                                BorderTile((x * TILE_SIZE + map_x, y * TILE_SIZE + map_y), image)
-                            else:
-                                Tile((x * TILE_SIZE + map_x, y * TILE_SIZE + map_y), image)
+                                image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
+                                if not self.is_free((x, y), map):
+                                    BorderTile((x * TILE_SIZE + map_x, y * TILE_SIZE + map_y), image)
+                                else:
+                                    Tile((x * TILE_SIZE + map_x, y * TILE_SIZE + map_y), image)
