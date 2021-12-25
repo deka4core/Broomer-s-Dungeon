@@ -1,8 +1,8 @@
 import pygame
 import sys
 
-from constants import *
 pygame.init()
+from constants import *
 from mixer import *
 
 menu_buttons = []

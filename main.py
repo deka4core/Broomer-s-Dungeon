@@ -1,12 +1,8 @@
-import pygame
 import os
 import sys
-import pytmx
 import menu
+from map_generator import *
 from constants import *
-
-all_entities = pygame.sprite.Group()  # группа всех живых объектов
-borders = pygame.sprite.Group()  # группа границ
 
 
 # Загрузка изображения
@@ -19,60 +15,41 @@ def load_image(name):
     return image
 
 
-class Tile(pygame.sprite.Sprite):
-    """           Класс тайла                """
-    def __init__(self, position, borders):
-        super().__init__(borders)
-        self.x, self.y = position
-        self.rect = pygame.Rect(self.x, self.y, TILE_SIZE, TILE_SIZE)
+def camera_configure(camera, target_rect):
+    left, top = target_rect[0], target_rect[1]
+    width, height = camera[-2], camera[-1]
+    left, top = -left + WIDTH / 2, -top + HEIGHT / 2
+
+    left = min(0, left)  # Не движемся дальше левой границы
+    left = max(-(camera.width - WIDTH), left)  # Не движемся дальше правой границы
+    top = max(-(camera.height - HEIGHT), top)  # Не движемся дальше нижней границы
+    top = min(0, top)  # Не движемся дальше верхней границы
+
+    return pygame.Rect(left, top, width, height)
 
 
-class BorderTile(Tile):
-    """    Класс тайла на который нельзя наступать       """
-    def __init__(self, position):
-        super().__init__(position, borders)
+class Camera(object):
+    def __init__(self, camera_func, width, height):
+        self.camera_func = camera_func
+        self.state = pygame.Rect(0, 0, width, height)
 
+    def apply(self, target):
+        return target.rect.move(self.state.topleft)
 
-class Map:
-    """                 Класс карты                       """
-    def __init__(self, filename, free_tiles):
-        self.map = pytmx.load_pygame(f'{MAPS_DIR}/{filename}')
-        self.height = self.map.height
-        self.width = self.map.width
-        self.tile_size = self.map.tilewidth
-        self.free_tiles = free_tiles
-        self.add_borders()
-
-    # Вывод карты из файла .tmx на экран
-    def render(self, screen):
-        for y in range(self.height):
-            for x in range(self.width):
-                image = self.map.get_tile_image(x, y, layer=0)
-                image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))  # Изменяем размер тайла
-                screen.blit(image, (x * TILE_SIZE, y * TILE_SIZE))
-
-    # узнаем ID тайла из тайлсета
-    def get_tile_id(self, position):
-        return self.map.tiledgidmap[self.map.get_tile_gid(*position, layer=0)]
-
-    def is_free(self, position):
-        return self.get_tile_id(position) in self.free_tiles
-
-    def add_borders(self):
-        for y in range(self.height):
-            for x in range(self.width):
-                if not self.is_free((x, y)):
-                    BorderTile((x * TILE_SIZE, y * TILE_SIZE))
+    def update(self, target):
+        self.state = self.camera_func(self.state, target.rect)
 
 
 class Hero(pygame.sprite.Sprite):
     def __init__(self, position, speed):
         super().__init__(all_entities)
         self.x, self.y = position
+        all_sprites.add(self)
         self.image = pygame.transform.scale(load_image(PLAYER_IMAGE), (63, 63))
         self.rect = self.image.get_rect().move(self.x, self.y)
         self.speed = speed
         self.xvel, self.yvel = 0, 0
+        self.orientation_right = True
 
     def get_position(self):
         return self.x, self.y
@@ -87,8 +64,14 @@ class Hero(pygame.sprite.Sprite):
         if pygame.key.get_pressed()[pygame.K_s]:
             self.yvel = self.speed
         if pygame.key.get_pressed()[pygame.K_a]:
+            if not self.orientation_right:
+                self.orientation_right = True
+                self.image = pygame.transform.flip(self.image, True, False)
             self.xvel = -self.speed
         if pygame.key.get_pressed()[pygame.K_d]:
+            if self.orientation_right:
+                self.orientation_right = False
+                self.image = pygame.transform.flip(self.image, True, False)
             self.xvel = self.speed
         if not (pygame.key.get_pressed()[pygame.K_w] or pygame.key.get_pressed()[pygame.K_s]):
             self.yvel = 0
@@ -115,16 +98,6 @@ class Hero(pygame.sprite.Sprite):
         return True
 
 
-class Game:
-    def __init__(self, map, hero):
-        self.map = map
-        self.hero = hero
-
-    def render(self, screen):
-        self.map.render(screen)
-        all_entities.draw(screen)
-
-
 def main():
     """
             Инициализация переменных
@@ -135,9 +108,10 @@ def main():
 
     menu.Menu('background_menu.png', screen, load_image, clock)
 
-    hero = Hero((WIDTH // 2, HEIGHT // 2), speed=6)
-    map = Map('map1.tmx', [34, 6, 7, 8, 14, 15, 16, 22, 23, 24, 30])
-    game = Game(map, hero)
+    hero = Hero((int(3.5 * TILE_SIZE * 20), int(3.5 * TILE_SIZE * 10)), speed=6)
+    map = Map([34, 6, 7, 8, 14, 15, 16, 22, 23, 24, 30])
+
+    camera = Camera(camera_configure, len(spawned_rooms) * TILE_SIZE * 26, len(spawned_rooms) * TILE_SIZE * 26)
 
     running = True
     while running:
@@ -146,9 +120,11 @@ def main():
                 pygame.quit()
                 sys.exit()
         all_entities.update(map)
-        screen.fill('black')
-        game.render(screen)
-        all_entities.draw(screen)
+        screen.fill((255, 208, 148))
+        camera.update(hero)
+        for e in all_sprites:
+            screen.blit(e.image, camera.apply(e))
+        screen.blit(hero.image, camera.apply(hero))
         pygame.display.flip()
         clock.tick(FPS)
 
