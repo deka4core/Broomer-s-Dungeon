@@ -15,16 +15,59 @@ def load_image(name):
     return image
 
 
+# Выводит координату самой левой комнаты
+def get_minimal_width(spawned_rooms):
+    min_w = 9999
+    for i in spawned_rooms:
+        for j in i:
+            if j != -1:
+                min_w = j[-2] if j[-2] < min_w else min_w
+    return min_w
+
+
+def get_minimal_height(spawned_rooms):
+    min_h = 9999
+    for i in spawned_rooms:
+        for j in i:
+            if j != -1:
+                min_h = j[-1] if j[-1] < min_h else min_h
+    return min_h
+
+
+def get_maximal_height(spawned_rooms):
+    max_h = 0
+    for i in spawned_rooms:
+        for j in i:
+            if j != -1:
+                max_h = j[-1] if j[-1] > max_h else max_h
+    return max_h
+
+
+def get_maximal_width(spawned_rooms):
+    max_w = 0
+    for i in spawned_rooms:
+        for j in i:
+            if j != -1:
+                max_w = j[-2] if j[-2] > max_w else max_w
+    return max_w
+
+
+minimal_w = get_minimal_width(spawned_rooms)
+minimal_h = get_minimal_height(spawned_rooms)
+maximal_h = get_maximal_height(spawned_rooms)
+maximal_w = get_maximal_width(spawned_rooms)
+
+
 # настройка слежения камеры
 def camera_configure(camera, target_rect):
     left, top = target_rect[0], target_rect[1]
     width, height = camera[-2], camera[-1]
     left, top = -left + WIDTH / 2, -top + HEIGHT / 2
 
-    left = min(0, left)  # Не движемся дальше левой границы
-    left = max(-(camera.width - WIDTH), left)  # Не движемся дальше правой границы
-    top = max(-(camera.height - HEIGHT), top)  # Не движемся дальше нижней границы
-    top = min(0, top)  # Не движемся дальше верхней границы
+    left = min(-minimal_w + WIDTH / 4, left)  # Не движемся дальше левой границы
+    left = max(-maximal_w + WIDTH / 4, left)  # Не движемся дальше правой границы
+    top = min(-minimal_h + HEIGHT / 4, top)  # Не движемся дальше нижней границы
+    top = max(-maximal_h + HEIGHT / 4, top)  # Не движемся дальше верхней границы
 
     return pygame.Rect(left, top, width, height)
 
@@ -33,6 +76,7 @@ class Camera(object):
     """
         Объект камеры
     """
+
     def __init__(self, camera_func, width, height):
         self.camera_func = camera_func
         self.state = pygame.Rect(0, 0, width, height)
@@ -50,6 +94,7 @@ class Hero(pygame.sprite.Sprite):
     """
         Класс главного героя
     """
+
     def __init__(self, position, speed):
         super().__init__(all_entities)
         all_sprites.add(self)
@@ -142,7 +187,7 @@ def main():
                 pygame.quit()
                 sys.exit()
         all_entities.update(map)
-        screen.fill((98, 88, 56))
+        screen.fill(BACKGROUND_COLOR)
         camera.update(hero)
         for e in all_sprites:
             screen.blit(e.image, camera.apply(e))

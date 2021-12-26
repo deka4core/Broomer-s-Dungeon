@@ -24,7 +24,7 @@ def room_at(x, y):
 
 
 def check_room(x, y):
-    return spawned_rooms[x][y] != 0
+    return spawned_rooms[x][y] != -1
 
 
 def build_passage_to(position, map_position, door, map):
@@ -51,7 +51,7 @@ def build_passage_to(position, map_position, door, map):
 def start():
     global ROOM_MAPS, spawned_rooms
     ROOM_MAPS = [pytmx.load_pygame(f'{MAPS_DIR}/map{i}.tmx') for i in range(1, 5)]
-    spawned_rooms = [[0] * MAP_MAX_WIDTH for i in range(MAP_MAX_HEIGHT)]
+    spawned_rooms = [[-1] * MAP_MAX_WIDTH for i in range(MAP_MAX_HEIGHT)]
     newRoom = Room(ROOM_SIZE, ROOM_MAPS[2])
 
     # Ставим начальную карту в координаты (3, 3)
@@ -64,7 +64,7 @@ def start():
     # Соединяет все комнаты между собой
     for x in range(len(spawned_rooms)):
         for y in range(len(spawned_rooms[0])):
-            if spawned_rooms[x][y] != 0:
+            if spawned_rooms[x][y] != -1:
                 room = spawned_rooms[x][y][0]
                 connect_room(room, (x, y))
 
@@ -74,19 +74,19 @@ def place_one_room():
     vacantPlaces = set()  # свободные места
     for x in range(len(spawned_rooms)):
         for y in range(len(spawned_rooms[0])):
-            if spawned_rooms[x][y] == 0:
+            if spawned_rooms[x][y] == -1:
                 continue
 
             max_x = len(spawned_rooms) - 1
             max_y = len(spawned_rooms[0]) - 1
 
-            if x > 0 and spawned_rooms[x - 1][y] == 0:
+            if x > 0 and spawned_rooms[x - 1][y] == -1:
                 vacantPlaces.add((x - 1, y))
-            if y > 0 and spawned_rooms[x][y - 1] == 0:
+            if y > 0 and spawned_rooms[x][y - 1] == -1:
                 vacantPlaces.add((x, y - 1))
-            if x < max_x and spawned_rooms[x + 1][y] == 0:
+            if x < max_x and spawned_rooms[x + 1][y] == -1:
                 vacantPlaces.add((x + 1, y))
-            if y < max_y and spawned_rooms[x][y + 1] == 0:
+            if y < max_y and spawned_rooms[x][y + 1] == -1:
                 vacantPlaces.add((x, y + 1))
 
     # Выбираем случайную комнату и конвертируем координаты в настоящие
@@ -219,11 +219,10 @@ class Map:
     def sort_tiles(self, maps):
         for row in maps:
             for item in row:
-                if item != 0:
+                if item != -1:
                     map_class, map_x, map_y = item
                     dup, ddown, dleft, dright = map_class.DoorU, map_class.DoorD, map_class.DoorL, map_class.DoorR
                     map = map_class.map
-                    print(map.width, map.height)
                     for y in range(map.height):
                         for x in range(map.width):
                             if dup.is_open() and (x, y) in dup.f_tiles:
