@@ -12,6 +12,7 @@ class Menu:
     """
         Класс окна главного меню
     """
+
     def __init__(self, background_name, screen, load_image, clock):
         self.is_started = False
         self.bckg_img = pygame.transform.scale(load_image(background_name), (WIDTH, HEIGHT))
@@ -20,6 +21,7 @@ class Menu:
     """
         Инициализация кнопок и основной цикл с отрисовкой
     """
+
     def on_start(self, screen, clock):
         start_button = Button(screen, width=300, height=70, inactive_color=(60, 63, 65), active_color=(43, 43, 43),
                               border_radius=5)
@@ -46,12 +48,14 @@ class Menu:
     """
         Начать игру
     """
+
     def start_game(self):
         self.is_started = True
 
     """
         Покинуть игру
     """
+
     def terminate(self):
         pygame.quit()
         sys.exit()
@@ -61,6 +65,7 @@ class Button:
     """
         Класс кнопки
     """
+
     def __init__(self, screen, width, height, inactive_color, active_color, color_text=(255, 255, 255),
                  border_radius=0):
         self.width = width
@@ -74,6 +79,7 @@ class Button:
     """
         Отрисовка прямоугольника кнопки
     """
+
     def draw(self, x, y, message, action=None):
         mouse = pygame.mouse.get_pos()
         click = pygame.mouse.get_pressed()
@@ -90,13 +96,14 @@ class Button:
             pygame.draw.rect(self.screen, self.inactive_color, (x, y, self.width, self.height),
                              border_radius=self.border_radius)
         font_size = self.width // len(message) if self.width // len(message) > 30 else 30  # вычисление размера шрифта
-                                                                                        # (изменить)
+        # (изменить)
         self.draw_text(x, y, message=message, font_size=font_size if font_size < 70 else 70, margin=10,
                        color=self.color_text)
 
     """
         Отрисовка текста на кнопке
     """
+
     def draw_text(self, x, y, message, color, font=None, font_size=24, margin=10):
         font_text = pygame.font.Font(font, font_size)
         text = font_text.render(message, True, color)
