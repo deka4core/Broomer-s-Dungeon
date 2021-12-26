@@ -3,6 +3,7 @@ import sys
 import menu
 from map_generator import *
 from constants import *
+from shadow_casting import *
 
 
 # Загрузка изображения
@@ -176,8 +177,11 @@ def main():
     # Инициализация классов
     hero = Hero((int(TILE_SIZE * (3 * ROOM_SIZE[0] + ROOM_SIZE[0] // 2 - 1)),
                  int(TILE_SIZE * (3 * ROOM_SIZE[1] + ROOM_SIZE[1] // 2 - 1))), speed=HERO_SPEED)
-    map = Map([34, 6, 7, 8, 14, 15, 16, 22, 23, 24, 30])
+    map_ = Map([34, 6, 7, 8, 14, 15, 16, 22, 23, 24, 30])
     camera = Camera(camera_configure, len(spawned_rooms) * TILE_SIZE * 26, len(spawned_rooms) * TILE_SIZE * 26)
+
+    raycasting = ShadowCasting2D((minimal_w, minimal_h, maximal_w, maximal_h))
+    print(list(map(lambda x: [(x.sx, x.sy), (x.ex, x.ey)], raycasting.convert_to_polymap())))
 
     # Основной цикл
     running = True
@@ -186,7 +190,7 @@ def main():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-        all_entities.update(map)
+        all_entities.update(map_)
         screen.fill(BACKGROUND_COLOR)
         camera.update(hero)
         for e in all_sprites:

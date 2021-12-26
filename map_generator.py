@@ -190,6 +190,7 @@ class Tile(pygame.sprite.Sprite):
         self.x, self.y = position
         self.image = image
         self.rect = pygame.Rect(self.x, self.y, TILE_SIZE, TILE_SIZE)
+        self.width, self.height = TILE_SIZE, TILE_SIZE
 
 
 class BorderTile(Tile):
@@ -197,6 +198,7 @@ class BorderTile(Tile):
     def __init__(self, position, image):
         super().__init__(position, image)
         borders.add(self)
+        BORDER_TILES.append((self.x, self.y))
 
 
 class Map:
