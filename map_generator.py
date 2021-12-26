@@ -27,15 +27,35 @@ def check_room(x, y):
     return spawned_rooms[x][y] != 0
 
 
+def build_passage_to(position, map_position, door, map):
+    x, y = position
+    map_x, map_y = map_position
+    if not door.is_builded():
+        for tile in door.nf_tiles:
+            x1, y1 = tile
+            image = map.get_tile_image(2, 2, layer=0)
+            image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
+            Tile((x1 * TILE_SIZE + map_x, map_y + (y1 * TILE_SIZE)), image)
+        for tile in door.borders_tiles:
+            image = map.get_tile_image(0, 0, layer=0)
+            image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
+            x1, y1 = tile
+            BorderTile((x1 * TILE_SIZE + map_x, map_y + (y1 * TILE_SIZE)), image)
+        door.build_passage()
+    image = map.get_tile_image(1, 1, layer=0)
+    image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
+    Tile((x * TILE_SIZE + map_x, y * TILE_SIZE + map_y), image)
+
+
 # При запуске
 def start():
     global ROOM_MAPS, spawned_rooms
-    ROOM_MAPS = [pytmx.load_pygame(f'{MAPS_DIR}/map{i}.tmx') for i in range(1, 4)]
+    ROOM_MAPS = [pytmx.load_pygame(f'{MAPS_DIR}/map{i}.tmx') for i in range(1, 5)]
     spawned_rooms = [[0] * MAP_MAX_WIDTH for i in range(MAP_MAX_HEIGHT)]
-    newRoom = Room((20, 10), ROOM_MAPS[2])
+    newRoom = Room(ROOM_SIZE, ROOM_MAPS[2])
 
     # Ставим начальную карту в координаты (3, 3)
-    spawned_rooms[3][3] = (newRoom, 3 * TILE_SIZE * 20, 3 * TILE_SIZE * 10)
+    spawned_rooms[3][3] = (newRoom, 3 * TILE_SIZE * ROOM_SIZE[0], 3 * TILE_SIZE * ROOM_SIZE[1])
 
     # Добавляем определенное кол-во комнат
     for i in range(ROOM_NUMBER):
@@ -70,7 +90,7 @@ def place_one_room():
                 vacantPlaces.add((x, y + 1))
 
     # Выбираем случайную комнату и конвертируем координаты в настоящие
-    newRoom = Room((20, 10), ROOM_MAPS[2])
+    newRoom = Room(ROOM_SIZE, ROOM_MAPS[2])
     vacantPlaces = list(vacantPlaces)
     position = random.choice(vacantPlaces)
     width, height = ROOM_SIZE
@@ -125,9 +145,12 @@ def connect_room(room, position):
 
 class Door:
     """            Класс двери            """
-    def __init__(self, tiles_coords):
+    def __init__(self, free_tiles_coords, not_free_tiles_coords=None, borders=None):
         self.opened = False
-        self.tiles = tiles_coords
+        self.f_tiles = free_tiles_coords
+        self.nf_tiles = not_free_tiles_coords
+        self.borders_tiles = borders
+        self.already_done = False
 
     def is_open(self):
         return self.opened
@@ -135,16 +158,26 @@ class Door:
     def change_state(self):
         self.opened = True
 
+    def build_passage(self):
+        self.already_done = True
+
+    def is_builded(self):
+        return self.already_done
+
 
 class Room:
     """            Класс комнаты            """
     def __init__(self, size, map):
         self.x, self.y = size
         self.map = map
-        self.DoorU = Door([(8, 0), (9, 0)])
-        self.DoorD = Door([(8, 9), (9, 9)])
-        self.DoorR = Door([(19, 4), (19, 5)])
-        self.DoorL = Door([(0, 4), (0, 5)])
+        self.DoorU = Door([(8, 0), (9, 0)], [(8, -1), (9, -1), (8, -2), (9, -2)],
+                          [(7, -1), (10, -1), (7, -2), (10, -2)])
+        self.DoorD = Door([(8, 9), (9, 9)], [(8, 10), (9, 10), (8, 11), (9, 11)],
+                          [(7, 10), (10, 10), (7, 11), (10, 11)])
+        self.DoorR = Door([(19, 4), (19, 5)], [(20, 4), (20, 5), (21, 4), (21, 5)],
+                          [(20, 3), (20, 6), (21, 3), (21, 6)])
+        self.DoorL = Door([(0, 4), (0, 5)], [(-1, 4), (-1, 5), (-2, 4), (-2, 5)],
+                          [(-1, 3), (-1, 6), (-2, 3), (-2, 6)])
 
 
 start()
@@ -190,15 +223,17 @@ class Map:
                     map_class, map_x, map_y = item
                     dup, ddown, dleft, dright = map_class.DoorU, map_class.DoorD, map_class.DoorL, map_class.DoorR
                     map = map_class.map
+                    print(map.width, map.height)
                     for y in range(map.height):
                         for x in range(map.width):
-                            if (dup.is_open() and (x, y) in dup.tiles) or \
-                                    (ddown.is_open() and (x, y) in ddown.tiles) or \
-                                    (dleft.is_open() and (x, y) in dleft.tiles) or \
-                                    (dright.is_open() and (x, y) in dright.tiles):
-                                image = map.get_tile_image(2, 2, layer=0)
-                                image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
-                                Tile((x * TILE_SIZE + map_x, y * TILE_SIZE + map_y), image)
+                            if dup.is_open() and (x, y) in dup.f_tiles:
+                                build_passage_to(position=(x, y), map_position=(map_x, map_y), door=dup, map=map)
+                            elif ddown.is_open() and (x, y) in ddown.f_tiles:
+                                build_passage_to(position=(x, y), map_position=(map_x, map_y), door=ddown, map=map)
+                            elif dleft.is_open() and (x, y) in dleft.f_tiles:
+                                build_passage_to(position=(x, y), map_position=(map_x, map_y), door=dleft, map=map)
+                            elif dright.is_open() and (x, y) in dright.f_tiles:
+                                build_passage_to(position=(x, y), map_position=(map_x, map_y), door=dright, map=map)
                             else:
                                 image = map.get_tile_image(x, y, layer=0)
                                 image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))

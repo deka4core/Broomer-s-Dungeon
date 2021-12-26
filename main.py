@@ -129,7 +129,8 @@ def main():
     menu.Menu('background_menu.png', screen, load_image, clock)
 
     # Инициализация классов
-    hero = Hero((int(3.5 * TILE_SIZE * 20), int(3.5 * TILE_SIZE * 10)), speed=6)
+    hero = Hero((int(TILE_SIZE * (3 * ROOM_SIZE[0] + ROOM_SIZE[0] // 2 - 1)),
+                 int(TILE_SIZE * (3 * ROOM_SIZE[1] + ROOM_SIZE[1] // 2 - 1))), speed=HERO_SPEED)
     map = Map([34, 6, 7, 8, 14, 15, 16, 22, 23, 24, 30])
     camera = Camera(camera_configure, len(spawned_rooms) * TILE_SIZE * 26, len(spawned_rooms) * TILE_SIZE * 26)
 
@@ -141,7 +142,7 @@ def main():
                 pygame.quit()
                 sys.exit()
         all_entities.update(map)
-        screen.fill((98,88,56))
+        screen.fill((98, 88, 56))
         camera.update(hero)
         for e in all_sprites:
             screen.blit(e.image, camera.apply(e))
