@@ -8,7 +8,7 @@ all_sprites = pygame.sprite.Group()  # группа всех спрайтов
 all_entities = pygame.sprite.Group()  # группа всех живых объектов
 borders = pygame.sprite.Group()  # группа границ
 ROOM_MAPS = []  # список карт всех комнат
-screen = pygame.display.set_mode(SIZE)
+screen = pygame.display.set_mode(SIZE)  # экран
 
 
 def more(x, y):
