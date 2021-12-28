@@ -1,32 +1,17 @@
 import random
-from constants import *
-import pygame
+from static_func import *
 import pytmx
 
-spawned_rooms = list()  # список установленных комнат
 all_sprites = pygame.sprite.Group()  # группа всех спрайтов
-all_entities = pygame.sprite.Group()  # группа всех живых объектов
 borders = pygame.sprite.Group()  # группа границ
+
+spawned_rooms = list()  # список установленных комнат
 ROOM_MAPS = []  # список карт всех комнат
+
 screen = pygame.display.set_mode(SIZE)  # экран
 
 
-def more(x, y):
-    return x > y
-
-
-def less(x, y):
-    return x < y
-
-
-def room_at(x, y):
-    return spawned_rooms[x][y][0]
-
-
-def check_room(x, y):
-    return spawned_rooms[x][y] != -1
-
-
+# Строит проход между двумя комнатами
 def build_passage_to(position, map_position, door, map):
     x, y = position
     map_x, map_y = map_position
@@ -52,10 +37,12 @@ def start():
     global ROOM_MAPS, spawned_rooms
     ROOM_MAPS = [pytmx.load_pygame(f'{MAPS_DIR}/map{i}.tmx') for i in range(1, 5)]
     spawned_rooms = [[-1] * MAP_MAX_WIDTH for i in range(MAP_MAX_HEIGHT)]
-    newRoom = Room(ROOM_SIZE, ROOM_MAPS[2])
 
-    # Ставим начальную карту в координаты (3, 3)
-    spawned_rooms[3][3] = (newRoom, 3 * TILE_SIZE * ROOM_SIZE[0], 3 * TILE_SIZE * ROOM_SIZE[1])
+    # Создаем начальную комнату
+    new_room = Room(ROOM_SIZE, ROOM_MAPS[2])
+
+    # Ставим начальную комнату в координаты (3, 3)
+    spawned_rooms[3][3] = (new_room, 3 * TILE_SIZE * ROOM_SIZE[0], 3 * TILE_SIZE * ROOM_SIZE[1])
 
     # Добавляем определенное кол-во комнат
     for i in range(ROOM_NUMBER):
@@ -71,7 +58,7 @@ def start():
 
 # Генерация комнат
 def place_one_room():
-    vacantPlaces = set()  # свободные места
+    vacantPlaces = set()  # Свободные места
     for x in range(len(spawned_rooms)):
         for y in range(len(spawned_rooms[0])):
             if spawned_rooms[x][y] == -1:
@@ -106,62 +93,69 @@ def connect_room(room, position):
     max_y = len(spawned_rooms[0]) - 1
     room_x, room_y = position
 
-    neighbours = list()  # список всех возможных дверей (1-DU, 2-UD, 3-RL, 4-LR)
+    neighbours = list()  # список всех возможных дверей (1-DOWN_UP, 2-UP_DOWN, 3-RIGHT_LEFT, 4-LEFT_RIGHT)
+
+    DOWN_UP, UP_DOWN, RIGHT_LEFT, LEFT_RIGHT = 1, 2, 3, 4
 
     # Добавление всех возможных проходов
-    if not room.DoorD.is_open() and less(room_y, max_y) and check_room(room_x, room_y + 1) and \
-            not room_at(room_x, room_y + 1).DoorU.is_open():
-        neighbours.append(1)
-    if not room.DoorU.is_open() and more(room_y, 0) and check_room(room_x, room_y - 1) and \
-            not room_at(room_x, room_y - 1).DoorD.is_open():
-        neighbours.append(2)
-    if not room.DoorR.is_open() and less(room_x, max_x) and check_room(room_x + 1, room_y) and \
-            not room_at(room_x + 1, room_y).DoorL.is_open():
-        neighbours.append(3)
-    if not room.DoorL.is_open() and more(room_x, 0) and check_room(room_x - 1, room_y) and \
-            not room_at(room_x - 1, room_y).DoorR.is_open():
-        neighbours.append(4)
+    if not room.DoorD.is_open() and less(room_y, max_y) and check_room(room_x, room_y + 1, spawned_rooms) and \
+            not room_at(room_x, room_y + 1, spawned_rooms).DoorU.is_open():
+        neighbours.append(DOWN_UP)
+    if not room.DoorU.is_open() and more(room_y, 0) and check_room(room_x, room_y - 1, spawned_rooms) and \
+            not room_at(room_x, room_y - 1, spawned_rooms).DoorD.is_open():
+        neighbours.append(UP_DOWN)
+    if not room.DoorR.is_open() and less(room_x, max_x) and check_room(room_x + 1, room_y, spawned_rooms) and \
+            not room_at(room_x + 1, room_y, spawned_rooms).DoorL.is_open():
+        neighbours.append(RIGHT_LEFT)
+    if not room.DoorL.is_open() and more(room_x, 0) and check_room(room_x - 1, room_y, spawned_rooms) and \
+            not room_at(room_x - 1, room_y, spawned_rooms).DoorR.is_open():
+        neighbours.append(LEFT_RIGHT)
 
     # Применение изменений
     if neighbours:
         for select_direction in neighbours:
-            if select_direction == 1:
+            if select_direction == DOWN_UP:
                 room.DoorD.change_state()
-                if check_room(room_x, room_y + 1):
-                    room_at(room_x, room_y + 1).DoorU.change_state()
-            elif select_direction == 2:
+                if check_room(room_x, room_y + 1, spawned_rooms):
+                    room_at(room_x, room_y + 1, spawned_rooms).DoorU.change_state()
+            elif select_direction == UP_DOWN:
                 room.DoorU.change_state()
-                if check_room(room_x, room_y - 1):
-                    room_at(room_x, room_y - 1).DoorD.change_state()
-            elif select_direction == 3:
+                if check_room(room_x, room_y - 1, spawned_rooms):
+                    room_at(room_x, room_y - 1, spawned_rooms).DoorD.change_state()
+            elif select_direction == RIGHT_LEFT:
                 room.DoorR.change_state()
-                if check_room(room_x + 1, room_y):
-                    room_at(room_x + 1, room_y).DoorL.change_state()
-            elif select_direction == 4:
+                if check_room(room_x + 1, room_y, spawned_rooms):
+                    room_at(room_x + 1, room_y, spawned_rooms).DoorL.change_state()
+            elif select_direction == LEFT_RIGHT:
                 room.DoorL.change_state()
-                if check_room(room_x - 1, room_y):
-                    room_at(room_x - 1, room_y).DoorR.change_state()
+                if check_room(room_x - 1, room_y, spawned_rooms):
+                    room_at(room_x - 1, room_y, spawned_rooms).DoorR.change_state()
 
 
 class Door:
     """            Класс двери            """
-    def __init__(self, free_tiles_coords, not_free_tiles_coords=None, borders=None):
-        self.opened = False
+    def __init__(self, free_tiles_coords, not_free_tiles_coords, borders_tiles):
         self.f_tiles = free_tiles_coords
         self.nf_tiles = not_free_tiles_coords
-        self.borders_tiles = borders
+        self.borders_tiles = borders_tiles
+
+        self.opened = False
         self.already_done = False
 
-    def is_open(self):
+    # Можно построить?
+    def is_open(self) -> bool:
         return self.opened
 
-    def change_state(self):
+    # Разрешить строительство
+    def change_state(self) -> None:
         self.opened = True
 
-    def build_passage(self):
+    # Построить проход
+    def build_passage(self) -> None:
         self.already_done = True
 
-    def is_builded(self):
+    # Уже построена?
+    def is_builded(self) -> bool:
         return self.already_done
 
 
@@ -170,6 +164,8 @@ class Room:
     def __init__(self, size, map):
         self.x, self.y = size
         self.map = map
+
+        # Создаем возможность поставить двери в 4 стороны
         self.DoorU = Door([(8, 0), (9, 0)], [(8, -1), (9, -1), (8, -2), (9, -2)],
                           [(7, -1), (10, -1), (7, -2), (10, -2)])
         self.DoorD = Door([(8, 9), (9, 9)], [(8, 10), (9, 10), (8, 11), (9, 11)],
@@ -178,9 +174,6 @@ class Room:
                           [(20, 3), (20, 6), (21, 3), (21, 6)])
         self.DoorL = Door([(0, 4), (0, 5)], [(-1, 4), (-1, 5), (-2, 4), (-2, 5)],
                           [(-1, 3), (-1, 6), (-2, 3), (-2, 6)])
-
-
-start()
 
 
 class Tile(pygame.sprite.Sprite):
@@ -208,15 +201,15 @@ class Map:
         self.sort_tiles(maps)
 
     # узнаем ID тайла из тайлсета
-    def get_tile_id(self, position, map):
-        return map.tiledgidmap[map.get_tile_gid(*position, layer=0)]
+    def get_tile_id(self, position, map_):
+        return map_.tiledgidmap[map_.get_tile_gid(*position, layer=0)]
 
-    # можно ли наступать на клетку
-    def is_free(self, position, map):
-        return self.get_tile_id(position, map) in self.free_tiles
+    # Можно ли наступать на клетку?
+    def is_free(self, position, map_) -> bool:
+        return self.get_tile_id(position, map_) in self.free_tiles
 
     # Сортировка тайлов и проходов
-    def sort_tiles(self, maps):
+    def sort_tiles(self, maps: list):
         for row in maps:
             for item in row:
                 if item != -1:
@@ -240,3 +233,6 @@ class Map:
                                     BorderTile((x * TILE_SIZE + map_x, y * TILE_SIZE + map_y), image)
                                 else:
                                     Tile((x * TILE_SIZE + map_x, y * TILE_SIZE + map_y), image)
+
+
+start()
