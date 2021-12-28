@@ -35,7 +35,7 @@ def build_passage_to(position, map_position, door, map):
 # При запуске
 def start():
     global ROOM_MAPS, spawned_rooms
-    ROOM_MAPS = [pytmx.load_pygame(f'{MAPS_DIR}/map{i}.tmx') for i in range(1, 5)]
+    ROOM_MAPS = [pytmx.load_pygame(f'{MAPS_DIR}/map{i}.tmx') for i in range(1, 4)]
     spawned_rooms = [[-1] * MAP_MAX_WIDTH for i in range(MAP_MAX_HEIGHT)]
 
     # Создаем начальную комнату
