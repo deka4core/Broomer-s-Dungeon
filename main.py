@@ -27,12 +27,17 @@ def main():
     # Основной цикл
     running = True
     frame = 0  # счетчик кадра
+    pygame.mouse.set_visible(False)
     while running:
         frame = (frame + 1) % 11
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            if event.type == pygame.USEREVENT:
+                global CURRENT_MUSIC
+                play_next_music()
+
         all_entities.update(frame)
         screen.fill(BACKGROUND_COLOR)
         camera.update(hero)
@@ -41,6 +46,9 @@ def main():
         monster.update(frame)
         screen.blit(monster.image, camera.apply(monster))
         screen.blit(hero.image, camera.apply(hero))
+        if pygame.mouse.get_focused():
+            pos = pygame.mouse.get_pos()
+            screen.blit(load_image('cursor.png'), pos)
         pygame.display.flip()
         clock.tick(FPS)
 

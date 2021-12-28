@@ -15,6 +15,8 @@ ROOM_SIZE = (20 + MARGIN_ROOMS, 10 + MARGIN_ROOMS)
 HERO_SPEED = 6
 BACKGROUND_COLOR = (162, 152, 98)
 MONSTER_CLASSIC_IMAGES = [f'monster_classic/monster_classic{i}.png' for i in range(1, 5)]
+BACKGROUND_MUSICS = [f'data/music/theme{i}.mp3' for i in range(1, 4)]
+CURRENT_MUSIC = 0
 
 IDLE = 0
 RUN = 1
