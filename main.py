@@ -99,11 +99,14 @@ class Hero(pygame.sprite.Sprite):
         super().__init__(all_entities)
         all_sprites.add(self)
         self.x, self.y = position
-        self.image = pygame.transform.scale(load_image(PLAYER_IMAGE), (63, 63))
+
+        self.image_number = 0
+        self.image = pygame.transform.scale(load_image(PLAYER_IMAGES[self.image_number]), (40, 45))
         self.rect = self.image.get_rect().move(self.x, self.y)
+
         self.speed = speed
         self.xvel, self.yvel = 0, 0
-        self.orientation_right = True
+        self.look_right = False
 
     # получить позицию
     def get_position(self):
@@ -114,23 +117,31 @@ class Hero(pygame.sprite.Sprite):
         self.x, self.y = position
         self.rect = self.image.get_rect().move(self.x, self.y)
 
-    def update(self, map):
+    def update(self, frame):
         # Проверка нажатых клавиш, изменение вектора направления
         if pygame.key.get_pressed()[pygame.K_w]:
+            if frame == 5:
+                self.image_number = (self.image_number + 1) % 4
+                self.image = pygame.transform.scale(load_image(PLAYER_IMAGES[self.image_number]), (40, 45))
             self.yvel = -self.speed
         if pygame.key.get_pressed()[pygame.K_s]:
+            if frame == 5:
+                self.image_number = (self.image_number + 1) % 4
+                self.image = pygame.transform.scale(load_image(PLAYER_IMAGES[self.image_number]), (40, 45))
             self.yvel = self.speed
         if pygame.key.get_pressed()[pygame.K_a]:
             # поворот изображения в сторону ходьбы
-            if not self.orientation_right:
-                self.orientation_right = True
+            if frame == 5:
+                self.image_number = (self.image_number + 1) % 4
+                self.image = pygame.transform.scale(load_image(PLAYER_IMAGES[self.image_number]), (40, 45))
                 self.image = pygame.transform.flip(self.image, True, False)
+                self.look_right = False
             self.xvel = -self.speed
         if pygame.key.get_pressed()[pygame.K_d]:
-            # поворот изображения в сторону ходьбы
-            if self.orientation_right:
-                self.orientation_right = False
-                self.image = pygame.transform.flip(self.image, True, False)
+            if frame == 5:
+                self.image_number = (self.image_number + 1) % 4
+            self.image = pygame.transform.scale(load_image(PLAYER_IMAGES[self.image_number]), (40, 45))
+            self.look_right = True
             self.xvel = self.speed
 
         # Сброс векторов направления, если ни одна клавиша не зажата
@@ -138,6 +149,14 @@ class Hero(pygame.sprite.Sprite):
             self.yvel = 0
         if not (pygame.key.get_pressed()[pygame.K_d] or pygame.key.get_pressed()[pygame.K_a]):
             self.xvel = 0
+
+        if not (pygame.key.get_pressed()[pygame.K_d] or pygame.key.get_pressed()[pygame.K_a]) and \
+                not (pygame.key.get_pressed()[pygame.K_w] or pygame.key.get_pressed()[pygame.K_s]):
+            self.image_number = 0
+            self.image = pygame.transform.scale(load_image(PLAYER_IMAGES[self.image_number]), (40, 45))
+            if not self.look_right:
+                self.image = pygame.transform.flip(self.image, True, False)
+
 
         # Проверка на коллизию. Если проходит, то перемещаем игрока
         if self.collide_x():
@@ -148,7 +167,7 @@ class Hero(pygame.sprite.Sprite):
     # Проверка на коллизию по оси X
     def collide_x(self):
         for border in borders:
-            if pygame.Rect(self.rect.x + self.xvel + 2, self.rect.y + 2,
+            if pygame.Rect(self.rect.x + self.xvel, self.rect.y,
                            TILE_SIZE - 4, TILE_SIZE - 4).colliderect(border.rect):
                 return False
         return True
@@ -156,10 +175,42 @@ class Hero(pygame.sprite.Sprite):
     # Проверка на коллизию по оси Y
     def collide_y(self):
         for border in borders:
-            if pygame.Rect(self.rect.x + 2, self.rect.y + self.yvel + 2,
+            if pygame.Rect(self.rect.x, self.rect.y + self.yvel,
                            TILE_SIZE - 4, TILE_SIZE - 4).colliderect(border.rect):
                 return False
         return True
+
+
+class Enemy(pygame.sprite.Sprite):
+    """
+        Класс врага
+    """
+
+    def __init__(self, position, speed):
+        super().__init__(all_entities)
+        all_sprites.add(self)
+        self.x, self.y = position
+
+        self.image_number = 0
+        self.image = pygame.transform.scale(load_image(MONSTER_CLASSIC_IMAGES[self.image_number]), (63, 63))
+        self.rect = self.image.get_rect().move(self.x, self.y)
+
+        self.speed = speed
+        self.xvel, self.yvel = 0, 0
+        self.orientation_right = True
+
+    def get_position(self):
+        return self.x, self.y
+
+    # сменить позицию на ...
+    def set_position(self, position):
+        self.x, self.y = position
+        self.rect = self.image.get_rect().move(self.x, self.y)
+
+    def update(self, frame=0):
+        if frame == 10:
+            self.image_number = (self.image_number + 1) % 4
+            self.image = pygame.transform.scale(load_image(MONSTER_CLASSIC_IMAGES[self.image_number]), (63, 63))
 
 
 def main():
@@ -178,19 +229,27 @@ def main():
                  int(TILE_SIZE * (3 * ROOM_SIZE[1] + ROOM_SIZE[1] // 2 - 1))), speed=HERO_SPEED)
     map = Map([34, 6, 7, 8, 14, 15, 16, 22, 23, 24, 30])
     camera = Camera(camera_configure, len(spawned_rooms) * TILE_SIZE * 26, len(spawned_rooms) * TILE_SIZE * 26)
+    monster = Enemy((int(TILE_SIZE * (3 * ROOM_SIZE[0] + ROOM_SIZE[0] // 2 - 1)),
+                 int(TILE_SIZE * (3 * ROOM_SIZE[1] + ROOM_SIZE[1] // 2 - 2))), speed=HERO_SPEED - 2)
 
     # Основной цикл
     running = True
+    frame = 0
     while running:
+
+        frame = (frame + 1) % 11
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-        all_entities.update(map)
+        all_entities.update(frame)
         screen.fill(BACKGROUND_COLOR)
         camera.update(hero)
         for e in all_sprites:
             screen.blit(e.image, camera.apply(e))
+        monster.update(frame)
+        screen.blit(monster.image, camera.apply(monster))
         screen.blit(hero.image, camera.apply(hero))
         pygame.display.flip()
         clock.tick(FPS)
