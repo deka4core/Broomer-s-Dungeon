@@ -23,6 +23,7 @@ class Entity(pygame.sprite.Sprite):
         self.x, self.y = position
         self.speed = speed
         self.x_vel, self.y_vel = 0, 0
+        self.damage = 5
 
         self.health_points = 100
 
@@ -78,6 +79,10 @@ class Entity(pygame.sprite.Sprite):
                 return False
         return True
 
+    def get_damage(self, damage: int, arr_hit: list, color: str) -> None:
+        self.health_points -= damage
+        Hit(damage=damage, coords=(self.rect.x, self.rect.y), arr=arr_hit, color=color)
+
 
 class Hero(Entity):
     """
@@ -86,8 +91,6 @@ class Hero(Entity):
 
     def __init__(self, position, speed, images, size=(TILE_SIZE, TILE_SIZE)):
         super().__init__(position, speed, images, size)
-
-        self.damage = 5
 
     def update(self, frame: int) -> None:
         # Проверка нажатых клавиш, изменение вектора направления и проигрывание анимации
@@ -136,29 +139,27 @@ class Enemy(Entity):
         self.damaged_from = None
         self.frame_K = 10
         self.health_points = 20
+        self.damage = 2
 
-        # self.timer = 0 Todo: Таймер для ИИ
+        self.timer = 0  # Todo: Таймер для ИИ
         # self.behaviour = random.random() Todo: Поведение ИИ (60 % - шанс агрессивного ИИ)
         monsters.append(self)
 
     # Проверка на пробитие и смена кадра
-    def update_e(self, arr: list, frame: int, hero_damage: int, arr_hit: list, player_pos: tuple):
+    def update_e(self, arr: list, frame: int, hero_damage: int, arr_hit: list, hero, clock):
+        player_pos = (hero.rect.x, hero.rect.y)
         if frame == self.frame_K:
             self.image_number = (self.image_number + 1) % 4
-            self.image = pygame.transform.scale(load_image(self.images[self.image_number]), (63, 63))
+            self.image = pygame.transform.scale(load_image(self.images[self.image_number]),  self.image_size)
         if self.collide_splash():
             self.health_points -= hero_damage
-            Hit(damage=hero_damage, coords=(self.rect.x, self.rect.y), arr=arr_hit)
+            self.get_damage(hero_damage, arr_hit, 'green')
         if self.health_points <= 0:
             del arr[arr.index(self)]
             self.kill()
         self.move_to_player(player_pos)
-
-    def play_animation(self, frame: int, state: int) -> None:
-        if state == IDLE:
-            if frame == self.frame_K:
-                self.image_number = (self.image_number + 1) % 4
-            self.image = pygame.transform.scale(load_image(self.images[self.image_number]), (63, 63))
+        self.do_timer(clock)
+        self.attack(hero, arr_hit)
 
     def collide_splash(self) -> bool:
         for splash in splash_sprites:
@@ -168,12 +169,15 @@ class Enemy(Entity):
                     return True
         return False
 
-    # def collide_player(self, hero) -> bool:
-    #     if self.rect.colliderect(splash.rect):
-    #         if splash != self.damaged_from:
-    #                 self.damaged_from = splash
-    #                 return True
-    #     return False
+    # Атакуем героя если рядом и прошел КД
+    def attack(self, hero: Hero, arr_hit: list) -> None:
+        if self.rect.colliderect(hero.rect):
+            if self.timer > 600:
+                hero.get_damage(self.damage, arr_hit, 'red')
+                self.timer = 0
+
+    def do_timer(self, clock: pygame.time.Clock):
+        self.timer += clock.get_time()
 
     def move_to_player(self, player_pos: tuple) -> None:
         # if self.behaviour > 0.4:  # Приближается, чтобы дать игроку по голове
@@ -187,12 +191,7 @@ class Enemy(Entity):
                 self.rect.x += self.x_vel * self.speed
             if self.collide_y():
                 self.rect.y += self.y_vel * self.speed
-
         # else:  # Рандомно носится как ужаленный
-
-    def attack(self, hero):
-        # Сделать анимацию атаки
-        pass
 
 
 class Splash(Entity):

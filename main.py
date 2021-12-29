@@ -64,7 +64,7 @@ def draw_all(frame, camera, hero, monsters, splashes, hit_marks, clock):
 
     for m in monsters:
         m.update_e(arr=monsters, frame=frame, hero_damage=hero.damage, arr_hit=hit_marks,
-                   player_pos=(hero.rect.x, hero.rect.y))
+                   hero=hero, clock=clock)
         screen.blit(m.image, camera.apply(m))
 
     screen.blit(hero.image, camera.apply(hero))
