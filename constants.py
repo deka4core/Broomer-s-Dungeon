@@ -19,6 +19,7 @@ BACKGROUND_MUSICS = [f'data/music/theme{i}.mp3' for i in range(1, 4)]
 SPLASH_IMAGE = ['splash.png']  # Костыль НЕ ТРОГАТЬ
 CURRENT_MUSIC = 0
 LOGO_NAME = 'logo.png'
+SHOOT_COOLDOWN = 400
 
 IDLE = 0
 RUN = 1

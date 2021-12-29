@@ -32,7 +32,9 @@ def main():
     running = True
     frame = 0  # счетчик кадра
     pygame.mouse.set_visible(False)
+    cooldown_tracker = 0
     while running:
+        cooldown_tracker -= clock.get_time() if cooldown_tracker > 0 else 0
         frame = (frame + 1) % 11
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -42,10 +44,12 @@ def main():
                 global CURRENT_MUSIC
                 play_next_music()
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                mx, my = event.pos
-                mx, my = hero.rect.x - (WIDTH // 2 - mx), hero.rect.y - (HEIGHT // 2 - my)
-                splash = Splash((hero.rect.x, hero.rect.y), 20, images=SPLASH_IMAGE, need_pos=(mx, my))
-                splashes.append(splash)
+                if cooldown_tracker <= 0:
+                    mx, my = event.pos
+                    mx, my = hero.rect.x - (WIDTH // 2 - mx), hero.rect.y - (HEIGHT // 2 - my)
+                    splash = Splash((hero.rect.x, hero.rect.y), 20, images=SPLASH_IMAGE, need_pos=(mx, my))
+                    splashes.append(splash)
+                    cooldown_tracker = SHOOT_COOLDOWN
         all_entities.update(frame)
         screen.fill(BACKGROUND_COLOR)
         camera.update(hero)
