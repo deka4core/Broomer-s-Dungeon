@@ -16,6 +16,7 @@ class Menu:
     def __init__(self, background_name, screen, load_image, clock):
         self.is_started = False
         self.bckg_img = pygame.transform.scale(load_image(background_name), (WIDTH, HEIGHT))
+        self.logo = pygame.transform.scale(load_image(LOGO_NAME), (824, 199))
         self.on_start(screen, clock)
 
     """
@@ -38,6 +39,7 @@ class Menu:
                 elif event.type == pygame.USEREVENT:
                     pass
             screen.blit(self.bckg_img, (0, 0))
+            screen.blit(self.logo, (WIDTH // 2 - 400, HEIGHT // 2 - 400))
             for button in menu_buttons:
                 button[0].draw(*button[1])
             if self.is_started:

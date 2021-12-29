@@ -1,6 +1,7 @@
 from map_generator import *
 from static_func import load_image
 
+
 all_entities = pygame.sprite.Group()  # группа всех живых объектов
 
 
@@ -135,3 +136,8 @@ class Enemy(Entity):
             if frame == self.frame_K:
                 self.image_number = (self.image_number + 1) % 4
             self.image = pygame.transform.scale(load_image(self.images[self.image_number]), (63, 63))
+
+
+class Splash(Entity):
+    def __init__(self, position: tuple, speed: int, images: list, need_pos: tuple, size=(TILE_SIZE, TILE_SIZE)):
+        super().__init__(position, speed, images, size)

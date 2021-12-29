@@ -37,7 +37,6 @@ def main():
             if event.type == pygame.USEREVENT:
                 global CURRENT_MUSIC
                 play_next_music()
-
         all_entities.update(frame)
         screen.fill(BACKGROUND_COLOR)
         camera.update(hero)
