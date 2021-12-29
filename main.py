@@ -1,8 +1,8 @@
 from entities import *
 from camera import Camera, camera_configure
-from entities import Hero, Enemy
+from entities import Hero, monsters
 from gui import gui_sprites
-from monster_spawner import spawn_monsters, monsters
+from monster_spawner import spawn_monsters
 
 
 def main():
@@ -63,7 +63,8 @@ def draw_all(frame, camera, hero, monsters, splashes, hit_marks, clock):
         screen.blit(e.image, camera.apply(e))
 
     for m in monsters:
-        m.update_e(arr=monsters, frame=frame, hero_damage=hero.damage, arr_hit=hit_marks)
+        m.update_e(arr=monsters, frame=frame, hero_damage=hero.damage, arr_hit=hit_marks,
+                   player_pos=(hero.rect.x, hero.rect.y))
         screen.blit(m.image, camera.apply(m))
 
     screen.blit(hero.image, camera.apply(hero))
@@ -80,7 +81,7 @@ def draw_all(frame, camera, hero, monsters, splashes, hit_marks, clock):
 
     if pygame.mouse.get_focused():
         pos = pygame.mouse.get_pos()
-        screen.blit(load_image('cursor.png'), pos)
+        screen.blit(load_image(CURSOR_IMAGE), pos)
 
 
 main()

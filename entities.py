@@ -5,9 +5,9 @@ from static_func import load_image
 import math
 from gui import Hit
 
-
 all_entities = pygame.sprite.Group()  # группа всех живых объектов
 splash_sprites = pygame.sprite.Group()
+monsters = []
 
 
 class Entity(pygame.sprite.Sprite):
@@ -65,7 +65,7 @@ class Entity(pygame.sprite.Sprite):
     # Проверка на коллизию по оси X
     def collide_x(self) -> bool:
         for border in borders:
-            if pygame.Rect(self.rect.x + self.x_vel, self.rect.y,
+            if pygame.Rect(self.rect.x + self.x_vel + 2, self.rect.y + 2,
                            TILE_SIZE - 4, TILE_SIZE - 4).colliderect(border.rect):
                 return False
         return True
@@ -73,7 +73,7 @@ class Entity(pygame.sprite.Sprite):
     # Проверка на коллизию по оси Y
     def collide_y(self) -> bool:
         for border in borders:
-            if pygame.Rect(self.rect.x, self.rect.y + self.y_vel,
+            if pygame.Rect(self.rect.x + 2, self.rect.y + self.y_vel + 2,
                            TILE_SIZE - 4, TILE_SIZE - 4).colliderect(border.rect):
                 return False
         return True
@@ -137,16 +137,22 @@ class Enemy(Entity):
         self.frame_K = 10
         self.health_points = 20
 
-    def update_e(self, arr: list, frame: int, hero_damage: int, arr_hit: list):
+        # self.timer = 0 Todo: Таймер для ИИ
+        # self.behaviour = random.random() Todo: Поведение ИИ (60 % - шанс агрессивного ИИ)
+        monsters.append(self)
+
+    # Проверка на пробитие и смена кадра
+    def update_e(self, arr: list, frame: int, hero_damage: int, arr_hit: list, player_pos: tuple):
         if frame == self.frame_K:
             self.image_number = (self.image_number + 1) % 4
             self.image = pygame.transform.scale(load_image(self.images[self.image_number]), (63, 63))
-        if self.collide():
+        if self.collide_splash():
             self.health_points -= hero_damage
             Hit(damage=hero_damage, coords=(self.rect.x, self.rect.y), arr=arr_hit)
         if self.health_points <= 0:
             del arr[arr.index(self)]
             self.kill()
+        self.move_to_player(player_pos)
 
     def play_animation(self, frame: int, state: int) -> None:
         if state == IDLE:
@@ -154,7 +160,7 @@ class Enemy(Entity):
                 self.image_number = (self.image_number + 1) % 4
             self.image = pygame.transform.scale(load_image(self.images[self.image_number]), (63, 63))
 
-    def collide(self) -> bool:
+    def collide_splash(self) -> bool:
         for splash in splash_sprites:
             if self.rect.colliderect(splash.rect):
                 if splash != self.damaged_from:
@@ -162,8 +168,27 @@ class Enemy(Entity):
                     return True
         return False
 
-    def move_to_player(self):
-        pass
+    # def collide_player(self, hero) -> bool:
+    #     if self.rect.colliderect(splash.rect):
+    #         if splash != self.damaged_from:
+    #                 self.damaged_from = splash
+    #                 return True
+    #     return False
+
+    def move_to_player(self, player_pos: tuple) -> None:
+        # if self.behaviour > 0.4:  # Приближается, чтобы дать игроку по голове
+        px, py = player_pos
+        dx, dy = px - self.rect.x, py - self.rect.y
+        length = math.hypot(dx, dy)
+        if 0 < abs(length) < 500:
+            self.x_vel = dx / length
+            self.y_vel = dy / length
+            if self.collide_x():
+                self.rect.x += self.x_vel * self.speed
+            if self.collide_y():
+                self.rect.y += self.y_vel * self.speed
+
+        # else:  # Рандомно носится как ужаленный
 
     def attack(self, hero):
         # Сделать анимацию атаки
