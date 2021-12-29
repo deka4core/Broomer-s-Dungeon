@@ -2,6 +2,7 @@ from entities import *
 from camera import Camera, camera_configure
 from entities import Hero, Enemy
 from gui import gui_sprites
+from monster_spawner import spawn_monsters, monsters
 
 
 def main():
@@ -21,11 +22,8 @@ def main():
                 size=(45, 50))
     map_ = Map([34, 6, 7, 8, 14, 15, 16, 22, 23, 24, 30])
     camera = Camera(camera_configure, len(spawned_rooms) * TILE_SIZE * 26, len(spawned_rooms) * TILE_SIZE * 26)
-    monster = Enemy((int(TILE_SIZE * (3 * ROOM_SIZE[0] + ROOM_SIZE[0] // 2 - 1)),
-                     int(TILE_SIZE * (3 * ROOM_SIZE[1] + ROOM_SIZE[1] // 2 - 2))), speed=HERO_SPEED - 2,
-                    images=MONSTER_CLASSIC_IMAGES)
+    spawn_monsters(MONSTERS_NUMBER)
 
-    monsters = [monster]
     splashes = []
     hit_marks = []
 

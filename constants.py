@@ -20,6 +20,7 @@ SPLASH_IMAGE = ['splash.png']  # Костыль НЕ ТРОГАТЬ
 CURRENT_MUSIC = 0
 LOGO_NAME = 'logo.png'
 SHOOT_COOLDOWN = 400
+MONSTERS_NUMBER = 5
 
 IDLE = 0
 RUN = 1

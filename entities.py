@@ -87,7 +87,7 @@ class Hero(Entity):
     def __init__(self, position, speed, images, size=(TILE_SIZE, TILE_SIZE)):
         super().__init__(position, speed, images, size)
 
-        self.damage = 9999
+        self.damage = 5
 
     def update(self, frame: int) -> None:
         # Проверка нажатых клавиш, изменение вектора направления и проигрывание анимации
