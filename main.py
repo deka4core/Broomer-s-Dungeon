@@ -27,6 +27,11 @@ def main():
     monsters = [monster]
     splashes = []
 
+    # Эмбиент
+    pygame.mixer.music.load('data/sounds/dungeon_ambient_1.ogg')
+    pygame.mixer.music.set_volume(0.5)
+    pygame.mixer.music.play(-1)
+
     # Основной цикл
     running = True
     frame = 0  # счетчик кадра
@@ -39,9 +44,7 @@ def main():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-            if event.type == pygame.USEREVENT:
-                global CURRENT_MUSIC
-                play_next_music()
+
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if cooldown_tracker <= 0:
                     shoot_splash(event, hero, splashes)
@@ -52,18 +55,24 @@ def main():
 
 
 def draw_all(frame, camera, hero, monsters, splashes):
-    all_entities.update(frame)
     screen.fill(BACKGROUND_COLOR)
+
+    all_entities.update(frame)
     camera.update(hero)
+
     for e in all_sprites:
         screen.blit(e.image, camera.apply(e))
+
     for m in monsters:
         m.update_e(arr=monsters, frame=frame)
         screen.blit(m.image, camera.apply(m))
+
     screen.blit(hero.image, camera.apply(hero))
+
     for splash in splashes:
         splash.move(splashes)
         screen.blit(splash.image, camera.apply(splash))
+
     if pygame.mouse.get_focused():
         pos = pygame.mouse.get_pos()
         screen.blit(load_image('cursor.png'), pos)

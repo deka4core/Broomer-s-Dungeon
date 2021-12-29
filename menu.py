@@ -36,8 +36,9 @@ class Menu:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.terminate()
-                elif event.type == pygame.USEREVENT:
-                    pass
+                if event.type == pygame.USEREVENT:
+                    global CURRENT_MUSIC
+                    play_next_music()
             screen.blit(self.bckg_img, (0, 0))
             screen.blit(self.logo, (WIDTH // 2 - 400, HEIGHT // 2 - 400))
             for button in menu_buttons:
@@ -59,6 +60,7 @@ class Menu:
     """
 
     def terminate(self):
+        pygame.mixer.music.stop()
         pygame.quit()
         sys.exit()
 

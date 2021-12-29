@@ -1,3 +1,5 @@
+import random
+
 from map_generator import *
 from static_func import load_image
 import math
@@ -184,6 +186,7 @@ class Splash(Entity):
 
 
 def shoot_splash(event, hero, splashes):
+    pygame.mixer.Sound.play(random.choice(swish_attack_sounds))
     mx, my = event.pos
     mx, my = hero.rect.x - (WIDTH // 2 - mx), hero.rect.y - (HEIGHT // 2 - my)
     splash = Splash((hero.rect.x, hero.rect.y), 20, images=SPLASH_IMAGE, need_pos=(mx, my))
