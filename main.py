@@ -25,7 +25,6 @@ def main():
                     images=MONSTER_CLASSIC_IMAGES)
 
     monsters = [monster]
-
     splashes = []
 
     # Основной цикл
@@ -45,28 +44,29 @@ def main():
                 play_next_music()
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if cooldown_tracker <= 0:
-                    mx, my = event.pos
-                    mx, my = hero.rect.x - (WIDTH // 2 - mx), hero.rect.y - (HEIGHT // 2 - my)
-                    splash = Splash((hero.rect.x, hero.rect.y), 20, images=SPLASH_IMAGE, need_pos=(mx, my))
-                    splashes.append(splash)
+                    shoot_splash(event, hero, splashes)
                     cooldown_tracker = SHOOT_COOLDOWN
-        all_entities.update(frame)
-        screen.fill(BACKGROUND_COLOR)
-        camera.update(hero)
-        for e in all_sprites:
-            screen.blit(e.image, camera.apply(e))
-        for m in monsters:
-            m.update_e(arr=monsters, frame=frame)
-            screen.blit(m.image, camera.apply(m))
-        screen.blit(hero.image, camera.apply(hero))
-        for splash in splashes:
-            splash.move(splashes)
-            screen.blit(splash.image, camera.apply(splash))
-        if pygame.mouse.get_focused():
-            pos = pygame.mouse.get_pos()
-            screen.blit(load_image('cursor.png'), pos)
+        draw_all(frame, camera, hero, monsters, splashes)
         pygame.display.flip()
         clock.tick(FPS)
+
+
+def draw_all(frame, camera, hero, monsters, splashes):
+    all_entities.update(frame)
+    screen.fill(BACKGROUND_COLOR)
+    camera.update(hero)
+    for e in all_sprites:
+        screen.blit(e.image, camera.apply(e))
+    for m in monsters:
+        m.update_e(arr=monsters, frame=frame)
+        screen.blit(m.image, camera.apply(m))
+    screen.blit(hero.image, camera.apply(hero))
+    for splash in splashes:
+        splash.move(splashes)
+        screen.blit(splash.image, camera.apply(splash))
+    if pygame.mouse.get_focused():
+        pos = pygame.mouse.get_pos()
+        screen.blit(load_image('cursor.png'), pos)
 
 
 main()

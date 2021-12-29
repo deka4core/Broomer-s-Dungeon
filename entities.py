@@ -181,3 +181,10 @@ class Splash(Entity):
             if self.rect.colliderect(border.rect):
                 return True
         return False
+
+
+def shoot_splash(event, hero, splashes):
+    mx, my = event.pos
+    mx, my = hero.rect.x - (WIDTH // 2 - mx), hero.rect.y - (HEIGHT // 2 - my)
+    splash = Splash((hero.rect.x, hero.rect.y), 20, images=SPLASH_IMAGE, need_pos=(mx, my))
+    splashes.append(splash)
