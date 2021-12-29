@@ -1,8 +1,10 @@
 from map_generator import *
 from static_func import load_image
+import math
 
 
 all_entities = pygame.sprite.Group()  # группа всех живых объектов
+splash_sprites = pygame.sprite.Group()
 
 
 class Entity(pygame.sprite.Sprite):
@@ -126,10 +128,13 @@ class Enemy(Entity):
 
         self.frame_K = 10
 
-    def update(self, frame=0):
+    def update_e(self, arr: list, frame: int):
         if frame == self.frame_K:
             self.image_number = (self.image_number + 1) % 4
             self.image = pygame.transform.scale(load_image(self.images[self.image_number]), (63, 63))
+        if self.collide():
+            del arr[arr.index(self)]
+            self.kill()
 
     def play_animation(self, frame: int, state: int) -> None:
         if state == IDLE:
@@ -137,7 +142,42 @@ class Enemy(Entity):
                 self.image_number = (self.image_number + 1) % 4
             self.image = pygame.transform.scale(load_image(self.images[self.image_number]), (63, 63))
 
+    def collide(self) -> bool:
+        for splash in splash_sprites:
+            if self.rect.colliderect(splash.rect):
+                return True
+        return False
+
 
 class Splash(Entity):
-    def __init__(self, position: tuple, speed: int, images: list, need_pos: tuple, size=(TILE_SIZE, TILE_SIZE)):
+    def __init__(self, position: tuple, speed: int, images: list, need_pos: tuple, size=(TILE_SIZE - 8, TILE_SIZE - 8)):
         super().__init__(position, speed, images, size)
+        splash_sprites.add(self)
+        # Mouse_x mouse_y
+        self.need_pos = need_pos
+        mx, my = need_pos
+        # Delta_x delta_y
+        dx, dy = mx - self.rect.x, my - self.rect.y
+        # Траектория полета
+        length = math.hypot(dx, dy)
+        self.dx = dx / length
+        self.dy = dy / length
+        # Наклон изображения
+        angle = math.degrees(math.atan2(-dy, dx))
+        self.image = pygame.transform.rotate(self.image, angle)
+        if dx < 0:
+            self.image = pygame.transform.flip(self.image, False, True)
+
+    def move(self, arr):
+        if not self.collide():
+            self.rect.x += self.dx * self.speed
+            self.rect.y += self.dy * self.speed
+        else:
+            del arr[arr.index(self)]
+            self.kill()
+
+    def collide(self) -> bool:
+        for border in borders:
+            if self.rect.colliderect(border.rect):
+                return True
+        return False
