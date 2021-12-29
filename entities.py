@@ -3,6 +3,7 @@ import random
 from map_generator import *
 from static_func import load_image
 import math
+from gui import Hit
 
 
 all_entities = pygame.sprite.Group()  # группа всех живых объектов
@@ -22,6 +23,8 @@ class Entity(pygame.sprite.Sprite):
         self.x, self.y = position
         self.speed = speed
         self.x_vel, self.y_vel = 0, 0
+
+        self.health_points = 100
 
         # Номер кадра анимации // Графика
         self.image_number = 0
@@ -84,6 +87,8 @@ class Hero(Entity):
     def __init__(self, position, speed, images, size=(TILE_SIZE, TILE_SIZE)):
         super().__init__(position, speed, images, size)
 
+        self.damage = 9999
+
     def update(self, frame: int) -> None:
         # Проверка нажатых клавиш, изменение вектора направления и проигрывание анимации
         if pygame.key.get_pressed()[pygame.K_w]:
@@ -128,13 +133,18 @@ class Enemy(Entity):
     def __init__(self, position, speed, images, size=(TILE_SIZE, TILE_SIZE)):
         super().__init__(position, speed, images, size)
 
+        self.damaged_from = None
         self.frame_K = 10
+        self.health_points = 20
 
-    def update_e(self, arr: list, frame: int):
+    def update_e(self, arr: list, frame: int, hero_damage: int, arr_hit: list):
         if frame == self.frame_K:
             self.image_number = (self.image_number + 1) % 4
             self.image = pygame.transform.scale(load_image(self.images[self.image_number]), (63, 63))
         if self.collide():
+            self.health_points -= hero_damage
+            Hit(damage=hero_damage, coords=(self.rect.x, self.rect.y), arr=arr_hit)
+        if self.health_points <= 0:
             del arr[arr.index(self)]
             self.kill()
 
@@ -147,8 +157,17 @@ class Enemy(Entity):
     def collide(self) -> bool:
         for splash in splash_sprites:
             if self.rect.colliderect(splash.rect):
-                return True
+                if splash != self.damaged_from:
+                    self.damaged_from = splash
+                    return True
         return False
+
+    def move_to_player(self):
+        pass
+
+    def attack(self, hero):
+        # Сделать анимацию атаки
+        pass
 
 
 class Splash(Entity):

@@ -1,6 +1,7 @@
 from entities import *
 from camera import Camera, camera_configure
 from entities import Hero, Enemy
+from gui import gui_sprites
 
 
 def main():
@@ -26,6 +27,7 @@ def main():
 
     monsters = [monster]
     splashes = []
+    hit_marks = []
 
     # Эмбиент
     pygame.mixer.music.load('data/sounds/dungeon_ambient_1.ogg')
@@ -44,17 +46,16 @@ def main():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
-
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if cooldown_tracker <= 0:
                     shoot_splash(event, hero, splashes)
                     cooldown_tracker = SHOOT_COOLDOWN
-        draw_all(frame, camera, hero, monsters, splashes)
+        draw_all(frame, camera, hero, monsters, splashes, hit_marks, clock)
         pygame.display.flip()
         clock.tick(FPS)
 
 
-def draw_all(frame, camera, hero, monsters, splashes):
+def draw_all(frame, camera, hero, monsters, splashes, hit_marks, clock):
     screen.fill(BACKGROUND_COLOR)
 
     all_entities.update(frame)
@@ -64,7 +65,7 @@ def draw_all(frame, camera, hero, monsters, splashes):
         screen.blit(e.image, camera.apply(e))
 
     for m in monsters:
-        m.update_e(arr=monsters, frame=frame)
+        m.update_e(arr=monsters, frame=frame, hero_damage=hero.damage, arr_hit=hit_marks)
         screen.blit(m.image, camera.apply(m))
 
     screen.blit(hero.image, camera.apply(hero))
@@ -72,6 +73,12 @@ def draw_all(frame, camera, hero, monsters, splashes):
     for splash in splashes:
         splash.move(splashes)
         screen.blit(splash.image, camera.apply(splash))
+
+    for hit in hit_marks:
+        hit.do_timer(clock=clock, arr=hit_marks)
+
+    for hit in gui_sprites:
+        screen.blit(hit.image, camera.apply(hit))
 
     if pygame.mouse.get_focused():
         pos = pygame.mouse.get_pos()
