@@ -3,11 +3,12 @@ import random
 from map_generator import *
 from static_func import load_image
 import math
-from gui import Hit
+from gui import Hit, Title
 
 all_entities = pygame.sprite.Group()  # группа всех живых объектов
 splash_sprites = pygame.sprite.Group()
 monsters = []
+titles = []
 
 
 class Entity(pygame.sprite.Sprite):
@@ -133,20 +134,21 @@ class Enemy(Entity):
         Класс врага
     """
 
-    def __init__(self, position, speed, images, size=(TILE_SIZE, TILE_SIZE)):
+    def __init__(self, position, speed: int, images, room_index: tuple, size=(TILE_SIZE, TILE_SIZE)):
         super().__init__(position, speed, images, size)
 
         self.damaged_from = None
         self.frame_K = 10
         self.health_points = 20
         self.damage = 2
+        self.room_index = room_index
 
         self.timer = 0  # Todo: Таймер для ИИ
-        # self.behaviour = random.random() Todo: Поведение ИИ (60 % - шанс агрессивного ИИ)
+        self.behaviour = random.random()  # Todo: Поведение ИИ (60 % - шанс агрессивного ИИ)
         monsters.append(self)
 
     # Проверка на пробитие и смена кадра
-    def update_e(self, arr: list, frame: int, hero_damage: int, arr_hit: list, hero, clock):
+    def update_e(self, arr: list, frame: int, hero_damage: int, arr_hit: list, hero, clock, rooms: list):
         player_pos = (hero.rect.x, hero.rect.y)
         if frame == self.frame_K:
             self.image_number = (self.image_number + 1) % 4
@@ -154,9 +156,17 @@ class Enemy(Entity):
         if self.collide_splash():
             self.health_points -= hero_damage
             self.get_damage(hero_damage, arr_hit, 'green')
+
         if self.health_points <= 0:
+            first_ind, second_ind = self.room_index
+            lst = rooms[first_ind][second_ind][0].mobs
+            del lst[lst.index(self)]
+            if len(lst) == 0:
+                rooms[first_ind][second_ind][0].have_monsters = False
+                titles.append(Title())
             del arr[arr.index(self)]
             self.kill()
+
         self.move_to_player(player_pos)
         self.do_timer(clock)
         self.attack(hero, arr_hit)
@@ -180,17 +190,17 @@ class Enemy(Entity):
         self.timer += clock.get_time()
 
     def move_to_player(self, player_pos: tuple) -> None:
-        # if self.behaviour > 0.4:  # Приближается, чтобы дать игроку по голове
-        px, py = player_pos
-        dx, dy = px - self.rect.x, py - self.rect.y
-        length = math.hypot(dx, dy)
-        if 0 < abs(length) < 500:
-            self.x_vel = dx / length
-            self.y_vel = dy / length
-            if self.collide_x():
-                self.rect.x += self.x_vel * self.speed
-            if self.collide_y():
-                self.rect.y += self.y_vel * self.speed
+        if self.behaviour > 0.4:  # Приближается, чтобы дать игроку по голове
+            px, py = player_pos
+            dx, dy = px - self.rect.x, py - self.rect.y
+            length = math.hypot(dx, dy)
+            if 0 < abs(length) < 500:
+                self.x_vel = dx / length
+                self.y_vel = dy / length
+                if self.collide_x():
+                    self.rect.x += self.x_vel * self.speed
+                if self.collide_y():
+                    self.rect.y += self.y_vel * self.speed
         # else:  # Рандомно носится как ужаленный
 
 
