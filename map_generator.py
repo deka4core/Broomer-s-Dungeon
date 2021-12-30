@@ -7,6 +7,9 @@ import pytmx
 
 all_sprites = pygame.sprite.Group()  # группа всех спрайтов
 borders = pygame.sprite.Group()  # группа границ
+door_borders = pygame.sprite.Group()  # двери в переходах
+door_tiles = pygame.sprite.Group()  # Пол в переходах
+default_tiles = pygame.sprite.Group()  # все другие свободные тайлы
 
 spawned_rooms = list()  # список установленных комнат
 ROOM_MAPS = []  # список карт всех комнат
@@ -23,16 +26,16 @@ def build_passage_to(position, map_position, door, map):
             x1, y1 = tile
             image = map.get_tile_image(2, 2, layer=0)
             image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
-            Tile((x1 * TILE_SIZE + map_x, map_y + (y1 * TILE_SIZE)), image)
+            Tile((x1 * TILE_SIZE + map_x, map_y + (y1 * TILE_SIZE)), image, door_tiles)
         for tile in door.borders_tiles:
             image = map.get_tile_image(0, 0, layer=0)
             image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
             x1, y1 = tile
-            BorderTile((x1 * TILE_SIZE + map_x, map_y + (y1 * TILE_SIZE)), image)
+            BorderTile((x1 * TILE_SIZE + map_x, map_y + (y1 * TILE_SIZE)), image, door_borders)
         door.build_passage()
     image = map.get_tile_image(1, 1, layer=0)
     image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
-    Tile((x * TILE_SIZE + map_x, y * TILE_SIZE + map_y), image)
+    Tile((x * TILE_SIZE + map_x, y * TILE_SIZE + map_y), image, default_tiles)
 
 
 # При запуске
@@ -203,18 +206,18 @@ class Room:
 
 class Tile(pygame.sprite.Sprite):
     """           Класс тайла                """
-    def __init__(self, position, image):
+    def __init__(self, position, image, tile_group):
         super().__init__(all_sprites)
         self.x, self.y = position
         self.image = image
         self.rect = pygame.Rect(self.x, self.y, TILE_SIZE, TILE_SIZE)
+        tile_group.add(self)
 
 
 class BorderTile(Tile):
     """    Класс тайла на который нельзя наступать       """
-    def __init__(self, position, image):
-        super().__init__(position, image)
-        borders.add(self)
+    def __init__(self, position, image, group_tile):
+        super().__init__(position, image, group_tile)
 
 
 class Map:
@@ -237,6 +240,8 @@ class Map:
     def sort_tiles(self, maps: list):
         for border in borders:
             border.kill()
+        for tile in default_tiles:
+            tile.kill()
         for row in maps:
             for item in row:
                 if item != -1:
@@ -257,13 +262,12 @@ class Map:
                                 image = map.get_tile_image(x, y, layer=0)
                                 image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
                                 if not self.is_free((x, y), map):
-                                    BorderTile((x * TILE_SIZE + map_x, y * TILE_SIZE + map_y), image)
+                                    BorderTile((x * TILE_SIZE + map_x, y * TILE_SIZE + map_y), image, borders)
                                 else:
-                                    Tile((x * TILE_SIZE + map_x, y * TILE_SIZE + map_y), image)
+                                    Tile((x * TILE_SIZE + map_x, y * TILE_SIZE + map_y), image, default_tiles)
 
 
 def check_player_room(player, map):
-    global borders, all_sprites
     for row in spawned_rooms:
         for item in row:
             if item != -1:
