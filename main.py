@@ -59,7 +59,7 @@ def draw_all(frame, camera, hero, monsters, splashes, hit_marks, clock, map_):
     all_entities.update(frame)
     camera.update(hero)
 
-    # check_player_room(hero, map_)
+    check_player_room(hero, map_)
 
     for e in all_sprites:
         screen.blit(e.image, camera.apply(e))

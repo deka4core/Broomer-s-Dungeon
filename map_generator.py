@@ -1,4 +1,7 @@
 import random
+
+import pygame
+
 from static_func import *
 import pytmx
 
@@ -115,21 +118,21 @@ def connect_room(room, position):
     if neighbours:
         for select_direction in neighbours:
             if select_direction == DOWN_UP:
-                room.DoorD.change_state()
+                room.DoorD.open_state()
                 if check_room(room_x, room_y + 1, spawned_rooms):
-                    room_at(room_x, room_y + 1, spawned_rooms).DoorU.change_state()
+                    room_at(room_x, room_y + 1, spawned_rooms).DoorU.open_state()
             elif select_direction == UP_DOWN:
-                room.DoorU.change_state()
+                room.DoorU.open_state()
                 if check_room(room_x, room_y - 1, spawned_rooms):
-                    room_at(room_x, room_y - 1, spawned_rooms).DoorD.change_state()
+                    room_at(room_x, room_y - 1, spawned_rooms).DoorD.open_state()
             elif select_direction == RIGHT_LEFT:
-                room.DoorR.change_state()
+                room.DoorR.open_state()
                 if check_room(room_x + 1, room_y, spawned_rooms):
-                    room_at(room_x + 1, room_y, spawned_rooms).DoorL.change_state()
+                    room_at(room_x + 1, room_y, spawned_rooms).DoorL.open_state()
             elif select_direction == LEFT_RIGHT:
-                room.DoorL.change_state()
+                room.DoorL.open_state()
                 if check_room(room_x - 1, room_y, spawned_rooms):
-                    room_at(room_x - 1, room_y, spawned_rooms).DoorR.change_state()
+                    room_at(room_x - 1, room_y, spawned_rooms).DoorR.open_state()
 
 
 class Door:
@@ -147,12 +150,15 @@ class Door:
         return self.opened
 
     # Разрешить строительство
-    def change_state(self) -> None:
+    def open_state(self) -> None:
         self.opened = True
+
+    def close_state(self) -> None:
+        self.opened = False
 
     # Построить проход
     def build_passage(self) -> None:
-        self.already_done = True
+        self.already_done = not self.already_done
 
     # Уже построена?
     def is_builded(self) -> bool:
@@ -174,6 +180,25 @@ class Room:
                           [(20, 3), (20, 6), (21, 3), (21, 6)])
         self.DoorL = Door([(0, 4), (0, 5)], [(-1, 4), (-1, 5), (-2, 4), (-2, 5)],
                           [(-1, 3), (-1, 6), (-2, 3), (-2, 6)])
+
+        self.Doors = [self.DoorU, self.DoorD, self.DoorR, self.DoorL]
+
+        # Есть ли монстры внутри комнаты?
+        self.have_monsters = True
+        self.mobs = []
+
+    def block(self):
+        for door in self.Doors:
+            if door.is_builded():
+                door.close_state()
+
+    def unblock(self):
+        for door in self.Doors:
+            if door.is_builded():
+                door.open_state()
+
+    def is_opened(self):
+        return any([self.DoorU.is_open(), self.DoorD.is_open(), self.DoorR.is_open(), self.DoorL.is_open()])
 
 
 class Tile(pygame.sprite.Sprite):
@@ -210,6 +235,8 @@ class Map:
 
     # Сортировка тайлов и проходов
     def sort_tiles(self, maps: list):
+        for border in borders:
+            border.kill()
         for row in maps:
             for item in row:
                 if item != -1:
@@ -233,6 +260,23 @@ class Map:
                                     BorderTile((x * TILE_SIZE + map_x, y * TILE_SIZE + map_y), image)
                                 else:
                                     Tile((x * TILE_SIZE + map_x, y * TILE_SIZE + map_y), image)
+
+
+def check_player_room(player, map):
+    global borders, all_sprites
+    for row in spawned_rooms:
+        for item in row:
+            if item != -1:
+                room, room_x, room_y = item
+                px, py = player.rect.x, player.rect.y
+                if (room_x + TILE_SIZE < px < room_x + (ROOM_SIZE[0] - 6) * TILE_SIZE) and \
+                        (room_y + TILE_SIZE < py < room_y + (ROOM_SIZE[1] - 6) * TILE_SIZE):
+                    if room.have_monsters and room.is_opened():
+                        room.block()
+                        map.sort_tiles(spawned_rooms)
+                    elif not room.have_monsters and not room.is_opened():
+                        room.unblock()
+                        map.sort_tiles(spawned_rooms)
 
 
 start()
