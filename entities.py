@@ -220,16 +220,13 @@ class Splash(Entity):
         self.need_pos = need_pos
         mx, my = need_pos
         # Delta_x delta_y
-        dx, dy = mx - self.rect.x, my - self.rect.y
+        dx, dy = mx - self.rect.x + TILE_SIZE // 2, my - self.rect.y
         # Траектория полета
         length = math.hypot(dx, dy)
         self.dx = dx / length
         self.dy = dy / length
-        # Наклон изображения
-        angle = math.degrees(math.atan2(-dy, dx))
-        self.image = pygame.transform.rotate(self.image, angle)
         if dx < 0:
-            self.image = pygame.transform.flip(self.image, False, True)
+            self.image = pygame.transform.flip(self.image, True, False)
 
     def move(self, arr):
         if not self.collide():
@@ -249,9 +246,10 @@ class Splash(Entity):
         return False
 
 
-def shoot_splash(event, hero, splashes):
+def shoot_splash(event, hero, splashes, camera):
     pygame.mixer.Sound.play(random.choice(swish_attack_sounds))
     mx, my = event.pos
-    mx, my = hero.rect.x - (WIDTH // 2 - mx), hero.rect.y - (HEIGHT // 2 - my)
+    # mx, my = hero.rect.x - (WIDTH // 2 - mx) + TILE_SIZE // 2, hero.rect.y - (HEIGHT // 2 - my)  # Todo: Проблема в камере (когда она упирается стрельба становится неровной)
+    mx, my = abs(camera.state.x) + mx, abs(camera.state.y) + my
     splash = Splash((hero.rect.x, hero.rect.y), 20, images=SPLASH_IMAGE, need_pos=(mx, my))
     splashes.append(splash)

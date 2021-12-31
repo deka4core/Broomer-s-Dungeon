@@ -46,7 +46,7 @@ def main():
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 if cooldown_tracker <= 0:
-                    shoot_splash(event, hero, splashes)
+                    shoot_splash(event, hero, splashes, camera)
                     cooldown_tracker = SHOOT_COOLDOWN
         draw_all(frame, camera, hero, monsters, splashes, hit_marks, clock, map_)
         pygame.display.flip()
