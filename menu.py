@@ -24,6 +24,7 @@ class Menu:
     """
 
     def on_start(self, screen, clock):
+        self.screen = screen
         start_button = Button(screen, width=300, height=70, inactive_color=(60, 63, 65), active_color=(43, 43, 43),
                               border_radius=5)
         menu_buttons.append((start_button, (WIDTH // 2 - 150, HEIGHT // 2 - 70, 'Начать игру',
@@ -44,6 +45,7 @@ class Menu:
             for button in menu_buttons:
                 button[0].draw(*button[1])
             if self.is_started:
+                self.screen.fill('black')
                 break
             pygame.display.flip()
             clock.tick(FPS)
@@ -60,6 +62,7 @@ class Menu:
     """
 
     def terminate(self):
+        del menu_buttons
         pygame.mixer.music.stop()
         pygame.quit()
         sys.exit()

@@ -21,26 +21,31 @@ class Camera(object):
         return target.rect.move(self.state.topleft)
 
     # Обновить положение камеры
-    def update(self, target):
-        self.state = self.camera_func(self.state, target.rect)
+    def update(self, target, sides_minmax=None):
+        if sides_minmax is None:
+            sides_minmax = [static_func.get_minimal_width(spawned_rooms),
+                            static_func.get_minimal_height(spawned_rooms),
+                            static_func.get_maximal_height(spawned_rooms),
+                            static_func.get_maximal_width(spawned_rooms)]
+        self.state = self.camera_func(self.state, target.rect, sides_minmax)
 
 
 # настройка слежения камеры
-def camera_configure(camera, target_rect) -> pygame.Rect:
+def camera_configure(camera, target_rect, sides_minmax) -> pygame.Rect:
     left, top = target_rect[0], target_rect[1]
     width, height = camera[-2], camera[-1]
     left, top = -left + WIDTH / 2, -top + HEIGHT / 2
 
-    left = min(-minimal_w + WIDTH / 4, left)  # Не движемся дальше левой границы
-    left = max(-maximal_w + WIDTH / 4, left)  # Не движемся дальше правой границы
-    top = min(-minimal_h + HEIGHT / 4, top)  # Не движемся дальше нижней границы
-    top = max(-maximal_h + HEIGHT / 4, top)  # Не движемся дальше верхней границы
+    left = min(-sides_minmax[0] + WIDTH / 4, left)  # Не движемся дальше левой границы
+    left = max(-sides_minmax[-1] + WIDTH / 4, left)  # Не движемся дальше правой границы
+    top = min(-sides_minmax[1] + HEIGHT / 4, top)  # Не движемся дальше нижней границы
+    top = max(-sides_minmax[-2] + HEIGHT / 4, top)  # Не движемся дальше верхней границы
 
     return pygame.Rect(left, top, width, height)
 
 
 # Находим необходимые для конфигурации камеры значения
-minimal_w = static_func.get_minimal_width(spawned_rooms)
-minimal_h = static_func.get_minimal_height(spawned_rooms)
-maximal_h = static_func.get_maximal_height(spawned_rooms)
-maximal_w = static_func.get_maximal_width(spawned_rooms)
+# minimal_w = static_func.get_minimal_width(spawned_rooms)
+# minimal_h = static_func.get_minimal_height(spawned_rooms)
+# maximal_h = static_func.get_maximal_height(spawned_rooms)
+# maximal_w = static_func.get_maximal_width(spawned_rooms)

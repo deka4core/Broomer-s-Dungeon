@@ -10,6 +10,7 @@ swish_attack_sounds = [pygame.mixer.Sound('data/sounds/swish-1.wav'), pygame.mix
                        pygame.mixer.Sound('data/sounds/swish-3.wav')]
 
 pygame.mixer.music.load(BACKGROUND_MUSICS[CURRENT_MUSIC])
+pygame.mixer.music.set_volume(0.5)
 pygame.mixer.music.play()
 pygame.mixer.music.set_endevent(pygame.USEREVENT)
 

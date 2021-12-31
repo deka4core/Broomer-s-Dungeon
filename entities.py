@@ -249,7 +249,6 @@ class Splash(Entity):
 def shoot_splash(event, hero, splashes, camera):
     pygame.mixer.Sound.play(random.choice(swish_attack_sounds))
     mx, my = event.pos
-    # mx, my = hero.rect.x - (WIDTH // 2 - mx) + TILE_SIZE // 2, hero.rect.y - (HEIGHT // 2 - my)  # Todo: Проблема в камере (когда она упирается стрельба становится неровной)
     mx, my = abs(camera.state.x) + mx, abs(camera.state.y) + my
     splash = Splash((hero.rect.x, hero.rect.y), 20, images=SPLASH_IMAGE, need_pos=(mx, my))
     splashes.append(splash)

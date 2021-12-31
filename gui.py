@@ -38,7 +38,7 @@ class Title(pygame.sprite.Sprite):
         font = pygame.font.SysFont('arialblack.ttf', 72)
         self.image = font.render('Комната зачищена', True, 'gold')
         self.rect = self.image.get_rect().move(WIDTH // 2 - self.image.get_width() // 2,
-                                               HEIGHT // 2 - self.image.get_height() // 2)
+                                               HEIGHT // 2 - self.image.get_height())
 
     def destruct(self, arr: list):
         if self.timer > 1000:
