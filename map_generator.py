@@ -1,7 +1,5 @@
 import random
 
-import pygame
-
 from static_func import *
 import pytmx
 

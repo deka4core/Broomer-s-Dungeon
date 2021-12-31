@@ -70,11 +70,19 @@ class Entity(pygame.sprite.Sprite):
             if pygame.Rect(self.rect.x + self.x_vel + 2, self.rect.y + 2,
                            TILE_SIZE - 4, TILE_SIZE - 4).colliderect(border.rect):
                 return False
+        for border in door_borders:
+            if pygame.Rect(self.rect.x + self.x_vel + 2, self.rect.y + 2,
+                           TILE_SIZE - 4, TILE_SIZE - 4).colliderect(border.rect):
+                return False
         return True
 
     # Проверка на коллизию по оси Y
     def collide_y(self) -> bool:
         for border in borders:
+            if pygame.Rect(self.rect.x + 2, self.rect.y + self.y_vel + 2,
+                           TILE_SIZE - 4, TILE_SIZE - 4).colliderect(border.rect):
+                return False
+        for border in door_borders:
             if pygame.Rect(self.rect.x + 2, self.rect.y + self.y_vel + 2,
                            TILE_SIZE - 4, TILE_SIZE - 4).colliderect(border.rect):
                 return False
@@ -233,6 +241,9 @@ class Splash(Entity):
 
     def collide(self) -> bool:
         for border in borders:
+            if self.rect.colliderect(border.rect):
+                return True
+        for border in door_borders:
             if self.rect.colliderect(border.rect):
                 return True
         return False
