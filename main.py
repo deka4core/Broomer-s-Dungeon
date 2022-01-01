@@ -17,15 +17,13 @@ def main():
     # Открытие меню
     Menu('background_menu.png', screen, load_image, clock)
 
+    # Открываем лобби
+    Lobby([533, 534, 535, 536, 573, 574, 575, 576, 1207, 1208], clock, screen)
+
     # Инициализация классов
     hero = Hero((int(TILE_SIZE * (3 * ROOM_SIZE[0] + ROOM_SIZE[0] // 2 - 1)),
                  int(TILE_SIZE * (3 * ROOM_SIZE[1] + ROOM_SIZE[1] // 2 - 1))), speed=HERO_SPEED, images=PLAYER_IMAGES,
                 size=(45, 50))
-
-    # Открываем лобби
-    Lobby([1358, 1359, 1360, 1361, 1398, 1399, 1400, 1401,
-           1393, 1394, 1395, 1396, 1433, 1434, 1435, 1436, 1473, 1474, 1475, 1476,
-           2032, 2033], clock, screen)
 
     map_ = Map([34, 6, 7, 8, 14, 15, 16, 22, 23, 24, 30])
     camera = Camera(camera_configure, len(spawned_rooms) * TILE_SIZE * 26, len(spawned_rooms) * TILE_SIZE * 26)

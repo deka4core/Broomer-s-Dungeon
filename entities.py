@@ -160,7 +160,7 @@ class Enemy(Entity):
         player_pos = (hero.rect.x, hero.rect.y)
         if frame == self.frame_K:
             self.image_number = (self.image_number + 1) % 4
-            self.image = pygame.transform.scale(load_image(self.images[self.image_number]),  self.image_size)
+            self.image = pygame.transform.scale(load_image(self.images[self.image_number]), self.image_size)
         if self.collide_splash():
             self.health_points -= hero_damage
             self.get_damage(hero_damage, arr_hit, 'green')
