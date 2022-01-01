@@ -44,6 +44,7 @@ def start():
 
     # Создаем начальную комнату
     new_room = Room(ROOM_SIZE, ROOM_MAPS[2])
+    new_room.have_monsters = False
 
     # Ставим начальную комнату в координаты (3, 3)
     spawned_rooms[3][3] = (new_room, 3 * TILE_SIZE * ROOM_SIZE[0], 3 * TILE_SIZE * ROOM_SIZE[1])

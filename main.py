@@ -1,3 +1,5 @@
+import pygame.transform
+
 from entities import *
 from lobby import *
 from camera import Camera, camera_configure
@@ -40,6 +42,10 @@ def main():
     # Основной цикл
     running = True
     frame = 0  # счетчик кадра
+
+    alpha_value = 0
+    death_bckg = pygame.Surface(SIZE)
+
     pygame.mouse.set_visible(False)
     cooldown_tracker = 0
     while running:
@@ -54,6 +60,13 @@ def main():
                     shoot_splash(event, hero, splashes, camera)
                     cooldown_tracker = SHOOT_COOLDOWN
         draw_all(frame, camera, hero, monsters, splashes, hit_marks, clock, map_)
+        if not hero.is_alive:
+            if alpha_value < 250:
+                alpha_value += 1
+                death_bckg.set_alpha(alpha_value)
+                screen.blit(death_bckg, (0, 0))
+            else:
+                break
         pygame.display.flip()
         clock.tick(FPS)
 

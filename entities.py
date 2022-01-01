@@ -1,5 +1,7 @@
 import random
 
+import pygame.transform
+
 from map_generator import *
 from static_func import load_image
 import math
@@ -100,41 +102,52 @@ class Hero(Entity):
 
     def __init__(self, position, speed, images, size=(TILE_SIZE, TILE_SIZE)):
         super().__init__(position, speed, images, size)
+        self.is_alive = True
 
     def update(self, frame: int) -> None:
-        # Проверка нажатых клавиш, изменение вектора направления и проигрывание анимации
-        if pygame.key.get_pressed()[pygame.K_w]:
-            self.play_animation(frame, state=RUN)
-            self.y_vel = -self.speed
-        if pygame.key.get_pressed()[pygame.K_s]:
-            self.play_animation(frame, state=RUN)
-            self.y_vel = self.speed
-        if pygame.key.get_pressed()[pygame.K_a]:
-            # Поворот изображения в сторону ходьбы
-            self.look_right = False
-            self.play_animation(frame, state=RUN)
-            self.x_vel = -self.speed
-        if pygame.key.get_pressed()[pygame.K_d]:
-            self.look_right = True
-            self.play_animation(frame, state=RUN)
-            self.x_vel = self.speed
+        if self.health_points > 0:
+            # Проверка нажатых клавиш, изменение вектора направления и проигрывание анимации
+            if pygame.key.get_pressed()[pygame.K_w]:
+                self.play_animation(frame, state=RUN)
+                self.y_vel = -self.speed
+            if pygame.key.get_pressed()[pygame.K_s]:
+                self.play_animation(frame, state=RUN)
+                self.y_vel = self.speed
+            if pygame.key.get_pressed()[pygame.K_a]:
+                # Поворот изображения в сторону ходьбы
+                self.look_right = False
+                self.play_animation(frame, state=RUN)
+                self.x_vel = -self.speed
+            if pygame.key.get_pressed()[pygame.K_d]:
+                self.look_right = True
+                self.play_animation(frame, state=RUN)
+                self.x_vel = self.speed
 
-        # Сброс векторов направления, если ни одна клавиша не зажата
-        if not (pygame.key.get_pressed()[pygame.K_w] or pygame.key.get_pressed()[pygame.K_s]):
-            self.y_vel = 0
-        if not (pygame.key.get_pressed()[pygame.K_d] or pygame.key.get_pressed()[pygame.K_a]):
-            self.x_vel = 0
+            # Сброс векторов направления, если ни одна клавиша не зажата
+            if not (pygame.key.get_pressed()[pygame.K_w] or pygame.key.get_pressed()[pygame.K_s]):
+                self.y_vel = 0
+            if not (pygame.key.get_pressed()[pygame.K_d] or pygame.key.get_pressed()[pygame.K_a]):
+                self.x_vel = 0
 
-        # IDLE Сброс всех анимаций при остановке
-        if not (pygame.key.get_pressed()[pygame.K_d] or pygame.key.get_pressed()[pygame.K_a]) and \
-                not (pygame.key.get_pressed()[pygame.K_w] or pygame.key.get_pressed()[pygame.K_s]):
-            self.play_animation(frame, state=IDLE)
+            # IDLE Сброс всех анимаций при остановке
+            if not (pygame.key.get_pressed()[pygame.K_d] or pygame.key.get_pressed()[pygame.K_a]) and \
+                    not (pygame.key.get_pressed()[pygame.K_w] or pygame.key.get_pressed()[pygame.K_s]):
+                self.play_animation(frame, state=IDLE)
 
-        # Проверка на коллизию. Если проходит, то перемещаем игрока
-        if self.collide_x():
-            self.rect.x += self.x_vel
-        if self.collide_y():
-            self.rect.y += self.y_vel
+            # Проверка на коллизию. Если проходит, то перемещаем игрока
+            if self.collide_x():
+                self.rect.x += self.x_vel
+            if self.collide_y():
+                self.rect.y += self.y_vel
+        else:
+            if self.is_alive:
+                self.image = pygame.transform.rotate(self.image, -90)
+                self.death()
+
+    def death(self):
+        pygame.mixer.Sound.play(death_fall_sound)
+        pygame.mixer.Sound.play(death_wave_sound)
+        self.is_alive = False
 
 
 class Enemy(Entity):
