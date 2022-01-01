@@ -1,5 +1,6 @@
 from menu import pygame
 from constants import WIDTH, HEIGHT
+from static_func import load_image
 
 hit_sprites = pygame.sprite.Group()
 
@@ -25,7 +26,11 @@ class Hit(pygame.sprite.Sprite):
 
     def do_timer(self, clock: pygame.time.Clock, arr: list):
         self.timer += clock.get_time()
+        self.move()
         self.destruct(arr=arr)
+
+    def move(self):
+        self.rect.y -= 0.05
 
 
 class Title(pygame.sprite.Sprite):
@@ -48,3 +53,20 @@ class Title(pygame.sprite.Sprite):
     def do_timer(self, clock: pygame.time.Clock, arr: list):
         self.timer += clock.get_time()
         self.destruct(arr=arr)
+
+
+class HealthBar:
+    def __init__(self, screen, hero):
+        self.health_points = hero.health_points
+        self.screen = screen
+        self.image = pygame.transform.scale(load_image('gui/health_bar.png'), (236, 24))
+        self.show()
+
+    def show(self):
+        pygame.draw.rect(self.screen, (0, 128, 0), (32, 31, 200, 20))
+        pygame.draw.rect(self.screen, (255, 0, 0), (32, 31, self.health_points * 2, 20))
+        self.screen.blit(self.image, (28, 30))
+
+    def update(self, health_points):
+        self.health_points = health_points
+        self.show()

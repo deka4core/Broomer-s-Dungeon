@@ -4,7 +4,7 @@ from entities import *
 from lobby import *
 from camera import Camera, camera_configure
 from entities import Hero, monsters
-from gui import hit_sprites
+from gui import hit_sprites, HealthBar
 from monster_spawner import spawn_monsters
 
 
@@ -26,6 +26,8 @@ def main():
     hero = Hero((int(TILE_SIZE * (3 * ROOM_SIZE[0] + ROOM_SIZE[0] // 2 - 1)),
                  int(TILE_SIZE * (3 * ROOM_SIZE[1] + ROOM_SIZE[1] // 2 - 1))), speed=HERO_SPEED, images=PLAYER_IMAGES,
                 size=(45, 50))
+
+    health_bar = HealthBar(screen, hero)
 
     map_ = Map([34, 6, 7, 8, 14, 15, 16, 22, 23, 24, 30])
     camera = Camera(camera_configure, len(spawned_rooms) * TILE_SIZE * 26, len(spawned_rooms) * TILE_SIZE * 26)
@@ -59,7 +61,46 @@ def main():
                 if cooldown_tracker <= 0:
                     shoot_splash(event, hero, splashes, camera)
                     cooldown_tracker = SHOOT_COOLDOWN
-        draw_all(frame, camera, hero, monsters, splashes, hit_marks, clock, map_)
+
+        # Отрисовка
+        screen.fill(BACKGROUND_COLOR)
+
+        all_entities.update(frame)
+        camera.update(hero)
+
+
+        check_player_room(hero, map_)
+
+        for e in all_sprites:
+            screen.blit(e.image, camera.apply(e))
+
+        screen.blit(hero.image, camera.apply(hero))
+
+        for m in monsters:
+            m.update_e(arr=monsters, frame=frame, hero_damage=hero.damage, arr_hit=hit_marks,
+                       hero=hero, clock=clock, rooms=spawned_rooms)
+            screen.blit(m.image, camera.apply(m))
+
+        for splash in splashes:
+            splash.move(splashes)
+            screen.blit(splash.image, camera.apply(splash))
+
+        for hit in hit_marks:
+            hit.do_timer(clock=clock, arr=hit_marks)
+
+        health_bar.update(hero.health_points)
+
+        for title in titles:
+            title.do_timer(clock=clock, arr=titles)
+            screen.blit(title.image, (title.rect.x, title.rect.y))
+
+        for hit in hit_sprites:
+            screen.blit(hit.image, camera.apply(hit))
+
+        if pygame.mouse.get_focused():
+            pos = pygame.mouse.get_pos()
+            screen.blit(load_image(CURSOR_IMAGE), pos)
+
         if not hero.is_alive:
             if alpha_value < 250:
                 alpha_value += 1
@@ -67,45 +108,9 @@ def main():
                 screen.blit(death_bckg, (0, 0))
             else:
                 break
+
         pygame.display.flip()
         clock.tick(FPS)
-
-
-def draw_all(frame, camera, hero, monsters, splashes, hit_marks, clock, map_):
-    screen.fill(BACKGROUND_COLOR)
-
-    all_entities.update(frame)
-    camera.update(hero)
-
-    check_player_room(hero, map_)
-
-    for e in all_sprites:
-        screen.blit(e.image, camera.apply(e))
-
-    for m in monsters:
-        m.update_e(arr=monsters, frame=frame, hero_damage=hero.damage, arr_hit=hit_marks,
-                   hero=hero, clock=clock, rooms=spawned_rooms)
-        screen.blit(m.image, camera.apply(m))
-
-    screen.blit(hero.image, camera.apply(hero))
-
-    for splash in splashes:
-        splash.move(splashes)
-        screen.blit(splash.image, camera.apply(splash))
-
-    for hit in hit_marks:
-        hit.do_timer(clock=clock, arr=hit_marks)
-
-    for title in titles:
-        title.do_timer(clock=clock, arr=titles)
-        screen.blit(title.image, (title.rect.x, title.rect.y))
-
-    for hit in hit_sprites:
-        screen.blit(hit.image, camera.apply(hit))
-
-    if pygame.mouse.get_focused():
-        pos = pygame.mouse.get_pos()
-        screen.blit(load_image(CURSOR_IMAGE), pos)
 
 
 main()
