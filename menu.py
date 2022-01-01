@@ -14,6 +14,7 @@ class Menu:
     """
 
     def __init__(self, background_name, screen, load_image, clock):
+        self.screen = screen
         self.is_started = False
         self.bckg_img = pygame.transform.scale(load_image(background_name), (WIDTH, HEIGHT))
         self.logo = pygame.transform.scale(load_image(LOGO_NAME), (824, 199))
@@ -24,7 +25,6 @@ class Menu:
     """
 
     def on_start(self, screen, clock):
-        self.screen = screen
         start_button = Button(screen, width=300, height=70, inactive_color=(60, 63, 65), active_color=(43, 43, 43),
                               border_radius=5)
         menu_buttons.append((start_button, (WIDTH // 2 - 150, HEIGHT // 2 - 70, 'Начать игру',
@@ -44,9 +44,12 @@ class Menu:
             screen.blit(self.logo, (WIDTH // 2 - 400, HEIGHT // 2 - 400))
             for button in menu_buttons:
                 button[0].draw(*button[1])
+
+            # Выход из меню
             if self.is_started:
                 self.screen.fill('black')
                 break
+
             pygame.display.flip()
             clock.tick(FPS)
 
@@ -62,7 +65,6 @@ class Menu:
     """
 
     def terminate(self):
-        del menu_buttons
         pygame.mixer.music.stop()
         pygame.quit()
         sys.exit()
@@ -102,8 +104,7 @@ class Button:
         else:  # курсор не на кнопке
             pygame.draw.rect(self.screen, self.inactive_color, (x, y, self.width, self.height),
                              border_radius=self.border_radius)
-        font_size = self.width // len(message) if self.width // len(message) > 30 else 30  # вычисление размера шрифта
-        # (изменить)
+        font_size = self.width // len(message) if self.width // len(message) > 30 else 30
         self.draw_text(x, y, message=message, font_size=font_size if font_size < 70 else 70, margin=10,
                        color=self.color_text)
 

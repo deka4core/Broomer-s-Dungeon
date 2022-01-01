@@ -9,6 +9,7 @@ import pytmx
 
 
 class Lobby:
+    """                              Класс Лобби                                              """
     def __init__(self, free_tiles, clock, screen):
         self.hero = Hero((WIDTH, HEIGHT), speed=HERO_SPEED, images=PLAYER_IMAGES, size=(57, 64))
         self.free_tiles = free_tiles
@@ -19,33 +20,42 @@ class Lobby:
         camera = Camera(camera_configure, WIDTH, HEIGHT)
         self.start(clock, camera)
 
+    # Основной цикл
     def start(self, clock, camera):
         frame = 0
         start_gui_images = [pygame.transform.scale(load_image(f'gui/press_to_start{i}.png'),
                                                    (432, 48)) for i in range(1, 3)]
         c_image = 0
         self.draw_map()
+        pygame.mouse.set_visible(False)
         while True:
             c_image += 0.03
-            camera.update(self.hero, sides_minmax=[0, 0, HEIGHT, WIDTH])
             frame = (frame + 1) % 11
-            all_entities.update(frame)
-            self.surface.fill((104, 144, 35))
+
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.terminate()
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
                         self.started = True
+
+            # Обновление положений
+            camera.update(self.hero, sides_minmax=[0, 0, HEIGHT, WIDTH])
+            all_entities.update(frame)
+
+            # Отрисовка
+            self.surface.fill((104, 144, 35))
             for e in all_sprites:
                 self.surface.blit(e.image, camera.apply(e))
             self.surface.blit(self.hero.image, camera.apply(self.hero))
 
+            # Анимация кнопки SPACE
             if int(c_image) >= 2:
                 c_image = 0
             self.surface.blit(start_gui_images[int(c_image)],
-                                (WIDTH - 450, HEIGHT - 80))
+                              (WIDTH - 450, HEIGHT - 80))
 
+            # Очистка всех данных при начале игры
             if self.started:
                 for sprite in default_tiles:
                     sprite.kill()
@@ -53,12 +63,15 @@ class Lobby:
                     sprite.kill()
                 self.hero.kill()
                 break
+
             pygame.display.flip()
             clock.tick(FPS)
 
+    # Проверка на свободную клетку
     def is_free(self, position, layer) -> bool:
         return self.map_.tiledgidmap[self.map_.get_tile_gid(*position, layer)] in self.free_tiles
 
+    # Отрисовка карты
     def draw_map(self):
         for sprite in default_tiles:
             sprite.kill()
@@ -75,6 +88,7 @@ class Lobby:
                         else:
                             Tile((x * TILE_SIZE, y * TILE_SIZE), image, default_tiles)
 
+    # Завершение процесса (Деструктор класса)
     def terminate(self):
         pygame.mixer.music.stop()
         pygame.quit()

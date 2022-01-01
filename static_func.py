@@ -72,6 +72,8 @@ def check_room(x, y, rooms) -> bool:
     return rooms[x][y] != -1
 
 
-
-
-
+# FPS Counter
+def update_fps(clock, font):
+    fps = str(int(clock.get_fps()))
+    fps_text = font.render(f'FPS: {fps}', True, pygame.Color("white"))
+    return fps_text

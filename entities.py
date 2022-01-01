@@ -161,7 +161,7 @@ class Enemy(Entity):
         self.damaged_from = None
         self.frame_K = 10
         self.health_points = 20
-        self.damage = 2
+        self.damage = 5
         self.room_index = room_index
 
         self.timer = 0  # Todo: Таймер для ИИ

@@ -42,10 +42,3 @@ def camera_configure(camera, target_rect, sides_minmax) -> pygame.Rect:
     top = max(-sides_minmax[-2] + HEIGHT / 4, top)  # Не движемся дальше верхней границы
 
     return pygame.Rect(left, top, width, height)
-
-
-# Находим необходимые для конфигурации камеры значения
-# minimal_w = static_func.get_minimal_width(spawned_rooms)
-# minimal_h = static_func.get_minimal_height(spawned_rooms)
-# maximal_h = static_func.get_maximal_height(spawned_rooms)
-# maximal_w = static_func.get_maximal_width(spawned_rooms)
