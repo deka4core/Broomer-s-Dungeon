@@ -7,14 +7,22 @@ from entities import Hero, monsters
 from gui import hit_sprites, HealthBar
 from monster_spawner import spawn_monsters
 
+pygame.init()
+screen = pygame.display.set_mode(SIZE)
+clock = pygame.time.Clock()
+font = pygame.font.SysFont("Arial", 20)
+
+
+def update_fps():
+    fps = str(int(clock.get_fps()))
+    fps_text = font.render(f'FPS: {fps}', True, pygame.Color("white"))
+    return fps_text
+
 
 def main():
     """
             Инициализация переменных
     """
-    pygame.init()
-    screen = pygame.display.set_mode(SIZE)
-    clock = pygame.time.Clock()
 
     # Открытие меню
     Menu('background_menu.png', screen, load_image, clock)
@@ -65,9 +73,10 @@ def main():
         # Отрисовка
         screen.fill(BACKGROUND_COLOR)
 
+
+
         all_entities.update(frame)
         camera.update(hero)
-
 
         check_player_room(hero, map_)
 
@@ -109,6 +118,8 @@ def main():
             else:
                 break
 
+        # ФПС
+        screen.blit(update_fps(), (WIDTH - 100, 25))
         pygame.display.flip()
         clock.tick(FPS)
 
