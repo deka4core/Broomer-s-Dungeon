@@ -70,3 +70,19 @@ class HealthBar:
     def update(self, health_points):
         self.health_points = health_points
         self.show()
+
+
+class CoinsBar:
+    def __init__(self, screen, hero, font):
+        self.coins = hero.coins
+        self.screen = screen
+        self.font = font
+        self.show()
+
+    def show(self):
+        image = self.font.render(f'Coins: {self.coins}', True, pygame.Color("gold"))
+        self.screen.blit(image, (28, 60))
+
+    def update(self, coins):
+        self.coins = coins
+        self.show()

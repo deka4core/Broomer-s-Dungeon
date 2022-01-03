@@ -22,6 +22,8 @@ LOGO_NAME = 'logo.png'
 SHOOT_COOLDOWN = 400
 MONSTERS_NUMBER = 5
 CURSOR_IMAGE = 'cursor.png'
+CHEST_OPENED_IMG = 'chest_opened.png'
+CHEST_CLOSED_IMG = 'chest_closed.png'
 
 IDLE = 0
 RUN = 1

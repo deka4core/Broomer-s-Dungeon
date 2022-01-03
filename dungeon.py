@@ -1,7 +1,8 @@
 from entities import *
 from lobby import *
+from chest import chests, chests_sprites
 from camera import Camera, camera_configure
-from gui import hit_sprites, HealthBar
+from gui import hit_sprites, HealthBar, CoinsBar
 from monster_spawner import spawn_monsters
 from static_func import update_fps
 
@@ -18,6 +19,7 @@ class Dungeon:
                     images=PLAYER_IMAGES,
                     size=(45, 50))
         health_bar = HealthBar(self.screen, hero)
+
         map_ = Map([34, 6, 7, 8, 14, 15, 16, 22, 23, 24, 30])
         camera = Camera(camera_configure, len(spawned_rooms) * TILE_SIZE * 26, len(spawned_rooms) * TILE_SIZE * 26)
         spawn_monsters(MONSTERS_NUMBER)
@@ -32,6 +34,7 @@ class Dungeon:
 
         # Шрифт
         font = pygame.font.SysFont("Arial", 18)
+        coins_bar = CoinsBar(self.screen, hero, font)
 
         # Различные флаги и переменные для отслеживания
         running = True
@@ -61,11 +64,16 @@ class Dungeon:
             all_entities.update(frame)
             camera.update(hero)
             check_player_room(hero, map_)
+            for chest in chests:
+                chest.update_hero(hero)
+
 
             # Отрисовка
             self.screen.fill(BACKGROUND_COLOR)
             for e in all_sprites:
                 self.screen.blit(e.image, camera.apply(e))
+            for chest in chests_sprites:
+                self.screen.blit(chest.image, camera.apply(chest))
             self.screen.blit(hero.image, camera.apply(hero))
             for m in monsters:
                 m.update_e(arr=monsters, frame=frame, hero_damage=hero.damage, arr_hit=hit_marks,
@@ -82,6 +90,7 @@ class Dungeon:
                 self.screen.blit(title.image, (title.rect.x, title.rect.y))
             for hit in hit_sprites:
                 self.screen.blit(hit.image, camera.apply(hit))
+            coins_bar.update(hero.coins)
 
             # Смена курсора на более удобный прицел
             if pygame.mouse.get_focused():

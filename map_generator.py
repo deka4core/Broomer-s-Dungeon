@@ -1,5 +1,6 @@
 import random
 
+from chest import spawn_chest
 from static_func import *
 import pytmx
 
@@ -279,6 +280,7 @@ def check_player_room(player, map):
                         map.sort_tiles(spawned_rooms)
                     elif not room.have_monsters and not room.is_opened():
                         room.unblock()
+                        spawn_chest((room_x, room_y))
                         map.sort_tiles(spawned_rooms)
 
 

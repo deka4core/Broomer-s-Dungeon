@@ -1,5 +1,3 @@
-import random
-
 import pygame.transform
 
 from map_generator import *
@@ -9,6 +7,7 @@ from gui import Hit, Title
 
 all_entities = pygame.sprite.Group()  # группа всех живых объектов
 splash_sprites = pygame.sprite.Group()
+
 monsters = []
 titles = []
 
@@ -103,6 +102,7 @@ class Hero(Entity):
     def __init__(self, position, speed, images, size=(TILE_SIZE, TILE_SIZE)):
         super().__init__(position, speed, images, size)
         self.is_alive = True
+        self.coins = 0
 
     def update(self, frame: int) -> None:
         if self.health_points > 0:
