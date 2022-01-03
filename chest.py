@@ -2,6 +2,7 @@ import random
 
 import pygame
 from constants import CHEST_CLOSED_IMG, CHEST_OPENED_IMG
+from mixer import coins_sounds
 from static_func import load_image
 
 chests_sprites = pygame.sprite.Group()
@@ -26,6 +27,7 @@ class Chest(pygame.sprite.Sprite):
             if not self.already_gained:
                 hero.coins += self.coins
                 self.already_gained = True
+                pygame.mixer.Sound.play(random.choice(coins_sounds))
 
     def open_chest(self):
         self.opened = True
