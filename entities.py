@@ -7,9 +7,11 @@ from gui import Hit, Title
 
 all_entities = pygame.sprite.Group()  # группа всех живых объектов
 splash_sprites = pygame.sprite.Group()
+sand_bullet = pygame.sprite.Group()
 
 monsters = []
 titles = []
+bullets = []
 
 
 class Entity(pygame.sprite.Sprite):
@@ -163,6 +165,7 @@ class Enemy(Entity):
         self.health_points = 20
         self.damage = 5
         self.room_index = room_index
+        self.size = size
 
         self.timer = 0  # Todo: Таймер для ИИ
         self.behaviour = random.random()  # Todo: Поведение ИИ (60 % - шанс агрессивного ИИ)
@@ -171,24 +174,21 @@ class Enemy(Entity):
     # Проверка на пробитие и смена кадра
     def update_e(self, arr: list, frame: int, hero_damage: int, arr_hit: list, hero, clock, rooms: list):
         player_pos = (hero.rect.x, hero.rect.y)
-        if frame == self.frame_K:
-            self.image_number = (self.image_number + 1) % 4
-            self.image = pygame.transform.scale(load_image(self.images[self.image_number]), self.image_size)
+        self.image = pygame.transform.scale(load_image(self.images[0]), self.size)
+        if self.look_right:
+            self.image = pygame.transform.flip(self.image, True, False)
         if self.collide_splash():
             self.health_points -= hero_damage
             self.get_damage(hero_damage, arr_hit, 'green')
 
         if self.health_points <= 0:
-            first_ind, second_ind = self.room_index
-            lst = rooms[first_ind][second_ind][0].mobs
-            del lst[lst.index(self)]
-            if len(lst) == 0:
-                rooms[first_ind][second_ind][0].have_monsters = False
-                titles.append(Title())
-            del arr[arr.index(self)]
-            self.kill()
-
-        self.move_to_player(player_pos)
+            self.destruct(rooms, arr)
+        first_ind, second_ind = self.room_index
+        room, room_x, room_y = rooms[first_ind][second_ind]
+        px, py = player_pos
+        if (room_x < px < room_x + (ROOM_SIZE[0] - 5) * TILE_SIZE) and \
+                (room_y < py < room_y + (ROOM_SIZE[1] - 5) * TILE_SIZE):
+            self.move_to_player(player_pos)
         self.do_timer(clock)
         self.attack(hero, arr_hit)
 
@@ -211,18 +211,27 @@ class Enemy(Entity):
         self.timer += clock.get_time()
 
     def move_to_player(self, player_pos: tuple) -> None:
-        if self.behaviour > 0.4:  # Приближается, чтобы дать игроку по голове
-            px, py = player_pos
-            dx, dy = px - self.rect.x, py - self.rect.y
-            length = math.hypot(dx, dy)
-            if 0 < abs(length) < 500:
-                self.x_vel = dx / length
-                self.y_vel = dy / length
-                if self.collide_x():
-                    self.rect.x += self.x_vel * self.speed
-                if self.collide_y():
-                    self.rect.y += self.y_vel * self.speed
-        # else:  # Рандомно носится как ужаленный
+        px, py = player_pos
+        dx, dy = px - self.rect.x, py - self.rect.y
+        length = math.hypot(dx, dy)
+        if 0 < abs(length) < 500:
+            self.x_vel = dx / length
+            self.y_vel = dy / length
+            if self.collide_x():
+                self.rect.x += self.x_vel * self.speed
+                self.look_right = True if self.x_vel >= 0 else False
+            if self.collide_y():
+                self.rect.y += self.y_vel * self.speed
+
+    def destruct(self, rooms: list, arr: list):
+        first_ind, second_ind = self.room_index
+        lst = rooms[first_ind][second_ind][0].mobs
+        del lst[lst.index(self)]
+        if len(lst) == 0:
+            rooms[first_ind][second_ind][0].have_monsters = False
+            titles.append(Title())
+        del arr[arr.index(self)]
+        self.kill()
 
 
 class Splash(Entity):
@@ -265,3 +274,83 @@ def shoot_splash(event, hero, splashes, camera):
     mx, my = abs(camera.state.x) + mx, abs(camera.state.y) + my
     splash = Splash((hero.rect.x, hero.rect.y), 20, images=SPLASH_IMAGE, need_pos=(mx, my))
     splashes.append(splash)
+
+
+class ShootingEnemy(Enemy):
+    def __init__(self, position, speed: int, images, room_index: tuple):
+        super().__init__(position, speed, images, room_index)
+        self.behaviour = 0.1
+
+    def attack(self, hero: Hero, arr_hit: list) -> None:
+        needed_pos = (hero.rect.x, hero.rect.y)
+        if self.timer > 2000:
+            SandBullet((self.rect.x, self.rect.y), 7, images=SANDBULLET_IMG, need_pos=needed_pos, arr_hit=arr_hit)
+            self.timer = 0
+
+    # Проверка на пробитие и смена кадра
+    def update_e(self, arr: list, frame: int, hero_damage: int, arr_hit: list, hero, clock, rooms: list):
+        player_pos = (hero.rect.x, hero.rect.y)
+        if frame == self.frame_K:
+            self.image_number = (self.image_number + 1) % 4
+            self.image = pygame.transform.scale(load_image(self.images[self.image_number]), self.image_size)
+        if self.collide_splash():
+            self.health_points -= hero_damage
+            self.get_damage(hero_damage, arr_hit, 'green')
+
+        if self.health_points <= 0:
+            first_ind, second_ind = self.room_index
+            lst = rooms[first_ind][second_ind][0].mobs
+            del lst[lst.index(self)]
+            if len(lst) == 0:
+                rooms[first_ind][second_ind][0].have_monsters = False
+                titles.append(Title())
+            del arr[arr.index(self)]
+            self.kill()
+
+        self.do_timer(clock)
+        first_ind, second_ind = self.room_index
+        room, room_x, room_y = rooms[first_ind][second_ind]
+        px, py = player_pos
+        if (room_x < px < room_x + (ROOM_SIZE[0] - 5) * TILE_SIZE) and \
+                (room_y < py < room_y + (ROOM_SIZE[1] - 5) * TILE_SIZE):
+            self.attack(hero, arr_hit)
+
+
+class SandBullet(Entity):
+    def __init__(self, position: tuple, speed: int, images: list, need_pos: tuple, arr_hit: list,
+                 size=(TILE_SIZE - 20, TILE_SIZE - 20)):
+        super().__init__(position, speed, images, size)
+        sand_bullet.add(self)
+        bullets.append(self)
+        # Mouse_x mouse_y
+        self.need_pos = need_pos
+        mx, my = need_pos
+        # Delta_x delta_y
+        dx, dy = mx - self.rect.x + TILE_SIZE // 2, my - self.rect.y + TILE_SIZE // 2
+        # Траектория полета
+        length = math.hypot(dx, dy)
+        self.dx = dx / length
+        self.dy = dy / length
+        if dx > 0:
+            self.image = pygame.transform.flip(self.image, True, False)
+        self.arr_hit = arr_hit
+
+    def move(self, arr, hero):
+        if not self.collide(hero):
+            self.rect.x += self.dx * self.speed
+            self.rect.y += self.dy * self.speed
+        else:
+            del arr[arr.index(self)]
+            self.kill()
+
+    def collide(self, hero) -> bool:
+        for border in borders:
+            if self.rect.colliderect(border.rect):
+                return True
+        for border in door_borders:
+            if self.rect.colliderect(border.rect):
+                return True
+        if self.rect.colliderect(hero.rect):
+            hero.get_damage(self.damage, self.arr_hit, 'red')
+            return True
+        return False

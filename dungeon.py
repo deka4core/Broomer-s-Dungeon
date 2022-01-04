@@ -82,6 +82,9 @@ class Dungeon:
             for splash in splashes:
                 splash.move(splashes)
                 self.screen.blit(splash.image, camera.apply(splash))
+            for bullet in sand_bullet:
+                bullet.move(bullets, hero)
+                self.screen.blit(bullet.image, camera.apply(bullet))
             for hit in hit_marks:
                 hit.do_timer(clock=clock, arr=hit_marks)
             health_bar.update(hero.health_points)

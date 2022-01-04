@@ -14,7 +14,8 @@ MARGIN_ROOMS = 4
 ROOM_SIZE = (20 + MARGIN_ROOMS, 10 + MARGIN_ROOMS)
 HERO_SPEED = 6
 BACKGROUND_COLOR = (162, 152, 98)
-MONSTER_CLASSIC_IMAGES = [f'monster_classic/monster_classic{i}.png' for i in range(1, 5)]
+MONSTER_SHOTTER_IMAGES = [f'monster_classic/monster_classic{i}.png' for i in range(1, 5)]
+MONSTER_CLASSIC_IMAGES = [f'enemy2.png']
 BACKGROUND_MUSICS = [f'data/music/theme{i}.mp3' for i in range(1, 4)]
 SPLASH_IMAGE = ['splash.png']  # Костыль НЕ ТРОГАТЬ
 CURRENT_MUSIC = 0
@@ -24,6 +25,7 @@ MONSTERS_NUMBER = 5
 CURSOR_IMAGE = 'cursor.png'
 CHEST_OPENED_IMG = 'chest_opened.png'
 CHEST_CLOSED_IMG = 'chest_closed.png'
+SANDBULLET_IMG = ['sand_ball.png']
 
 IDLE = 0
 RUN = 1
