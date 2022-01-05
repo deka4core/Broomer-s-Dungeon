@@ -1,3 +1,11 @@
+import random
+
+import pygame
+
+from constants import CHEST_CLOSED_IMG, CHEST_OPENED_IMG
+from mixer import coins_sounds
+from static_func import load_image
+
 chests_sprites = pygame.sprite.Group()
 all_tiles = pygame.sprite.Group()
 chests = []

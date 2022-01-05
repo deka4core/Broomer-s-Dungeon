@@ -1,6 +1,12 @@
 """
     Файл с камерой
 """
+import pygame
+
+import static_func
+from constants import WIDTH, HEIGHT
+
+
 class Camera(object):
     """
         Объект камеры
