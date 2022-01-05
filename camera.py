@@ -1,18 +1,13 @@
 """
     Файл с камерой
 """
-from menu import pygame
-from map_generator import spawned_rooms
-from constants import WIDTH, HEIGHT
-import static_func
-
-
 class Camera(object):
     """
         Объект камеры
     """
 
-    def __init__(self, camera_func, width, height):
+    def __init__(self, camera_func, width, height, rooms=None):
+        self.rooms = rooms
         self.camera_func = camera_func
         self.state = pygame.Rect(0, 0, width, height)
 
@@ -23,10 +18,10 @@ class Camera(object):
     # Обновить положение камеры
     def update(self, target, sides_minmax=None):
         if sides_minmax is None:
-            sides_minmax = [static_func.get_minimal_width(spawned_rooms),
-                            static_func.get_minimal_height(spawned_rooms),
-                            static_func.get_maximal_height(spawned_rooms),
-                            static_func.get_maximal_width(spawned_rooms)]
+            sides_minmax = [static_func.get_minimal_width(self.rooms),
+                            static_func.get_minimal_height(self.rooms),
+                            static_func.get_maximal_height(self.rooms),
+                            static_func.get_maximal_width(self.rooms)]
         self.state = self.camera_func(self.state, target.rect, sides_minmax)
 
 

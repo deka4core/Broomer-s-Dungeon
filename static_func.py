@@ -2,7 +2,9 @@
     Файл с функциями
 """
 import os
-from menu import *
+import sys
+
+import pygame
 
 
 # Загрузка изображения
@@ -62,14 +64,6 @@ def more(x, y) -> bool:
 
 def less(x, y) -> bool:
     return x < y
-
-
-def room_at(x, y, rooms: list):
-    return rooms[x][y][0]
-
-
-def check_room(x, y, rooms) -> bool:
-    return rooms[x][y] != -1
 
 
 # FPS Counter
