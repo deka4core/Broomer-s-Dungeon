@@ -39,5 +39,6 @@ SANDBULLET_IMG = ['sand_ball.png']
 LOGO_NAME = 'logo.png'
 SPLASH_IMAGE = ['splash.png']
 MONSTER_SHOTTER_IMAGES = [f'monster_classic/monster_classic{i}.png' for i in range(1, 5)]
+RESULTS_IMAGE = 'results.png'
 
 BACKGROUND_COLOR = (162, 152, 98)

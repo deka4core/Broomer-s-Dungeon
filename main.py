@@ -4,6 +4,7 @@ from constants import SIZE
 from dungeon import Dungeon
 from lobby import Lobby
 from menu import Menu
+from results import Results
 from static_func import load_image
 
 pygame.init()
@@ -21,6 +22,8 @@ def main():
         Lobby([533, 534, 535, 536, 573, 574, 575, 576, 1207, 1208], clock, screen)
         # Открываем данж
         Dungeon(screen, clock)
+
+        Results(screen, clock)
 
 
 if __name__ == "__main__":

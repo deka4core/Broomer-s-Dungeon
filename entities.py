@@ -181,7 +181,8 @@ class Hero(Entity):
 class Enemy(Entity):
     """                                   Класс врага                                            """
 
-    def __init__(self, position, speed: int, images_idle, images_run, room_index: tuple, size=(TILE_SIZE, TILE_SIZE)):
+    def __init__(self, position, speed: int, images_idle, images_run, room_index: tuple,
+                 size=(TILE_SIZE, TILE_SIZE)):
         super().__init__(position, speed, images_idle, images_run, size)
 
         self.damaged_from = None

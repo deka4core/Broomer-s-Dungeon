@@ -10,6 +10,7 @@ from entities import Hero, all_entities, splash_sprites, sand_bullet, titles
 from gui import HealthBar, CoinsBar, hit_marks
 from map_generator import Map
 from monster_spawner import MonsterSpawner
+from results import Database
 from static_func import update_fps, load_image
 
 
@@ -31,6 +32,9 @@ class Dungeon:
         self.coins_bar = CoinsBar(self.screen, self.hero, self.font)
         self.alpha_value = 0  # альфа-канал затемнения
         self.death_bckg = pygame.Surface(SIZE)  # экран затемнения
+
+        self.default_count_monsters = len(self.monster_spawner.monsters)
+        self.start_time = pygame.time.get_ticks()
 
         self.start()
 
@@ -58,6 +62,12 @@ class Dungeon:
 
             # Если герой умер
             if not self.hero.is_alive:
+                if self.alpha_value < 250:
+                    self.change_alpha_channel()
+                else:
+
+                    break
+            elif len(self.monster_spawner.monsters) == 0:
                 if self.alpha_value < 250:
                     self.change_alpha_channel()
                 else:
@@ -130,6 +140,11 @@ class Dungeon:
 
     # Деструктор класса
     def destruct(self):
+        database = Database()
+        alive = 1 if self.hero.is_alive else 0
+        database.set_values(self.hero.coins, pygame.time.get_ticks() - self.start_time,
+                            self.default_count_monsters - len(self.monster_spawner.monsters), alive)
+        database.close_connection()
         pygame.mixer.music.stop()
         pygame.mouse.set_visible(True)
         for sprite in all_tiles:
