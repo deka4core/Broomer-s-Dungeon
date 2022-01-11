@@ -1,8 +1,8 @@
 import random
 
 from constants import TILE_SIZE, ROOM_SIZE, HERO_SPEED, MONSTER_CLASSIC_IMAGES_IDLE, MONSTER_CLASSIC_IMAGES_RUN, \
-    MONSTER_SHOTTER_IMAGES
-from entities import Enemy, ShootingEnemy
+    MONSTER_SHOTTER_IMAGES, MONSTER_BOMBER_IDLE
+from entities import Enemy, ShootingEnemy, Bomber
 
 
 class MonsterSpawner:
@@ -21,15 +21,24 @@ class MonsterSpawner:
                         for i in range(number):
                             x = random.randint(start_xy[0], end_xy[0])
                             y = random.randint(start_xy[1], end_xy[1])
-                            rd_number = random.random()
-                            if rd_number > 0.4:
-                                enemy = Enemy((x, y), speed=HERO_SPEED - 2,
+                            # rd_number = random.random()
+                            # if rd_number >= 0.4:
+                            #     enemy =
+                            # elif rd_number > 0.6:
+                            #     enemy = ShootingEnemy((x, y), speed=HERO_SPEED - 2,
+                            #                           images=MONSTER_SHOTTER_IMAGES,
+                            #                           room_index=(rooms.index(row), row.index(item)))
+                            # elif rd_number:
+                            # enemy = Bomber((x, y), speed=HERO_SPEED - 2,
+                            #                     images=MONSTER_BOMBER_IDLE,
+                            #                     room_index=(rooms.index(row), row.index(item)))
+                            enemy = random.choice([Enemy((x, y), speed=HERO_SPEED - 2,
                                               images_idle=MONSTER_CLASSIC_IMAGES_IDLE,
                                               images_run=MONSTER_CLASSIC_IMAGES_RUN, room_index=(rooms.index(row),
-                                                                                                 row.index(item)))
-                            else:
-                                enemy = ShootingEnemy((x, y), speed=HERO_SPEED - 2,
+                                                                                                 row.index(item))), ShootingEnemy((x, y), speed=HERO_SPEED - 2,
                                                       images=MONSTER_SHOTTER_IMAGES,
-                                                      room_index=(rooms.index(row), row.index(item)))
+                                                      room_index=(rooms.index(row), row.index(item))), Bomber((x, y), speed=HERO_SPEED - 2,
+                                                images=MONSTER_BOMBER_IDLE,
+                                                room_index=(rooms.index(row), row.index(item)))])
                             room.mobs.append(enemy)
                             self.monsters.append(enemy)

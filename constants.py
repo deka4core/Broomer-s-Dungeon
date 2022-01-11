@@ -32,6 +32,8 @@ PLAYER_IMAGES_RUN = [f'player/player{i}.png' for i in range(2, 5)]
 MONSTER_CLASSIC_IMAGES_IDLE = ['enemy2.png']
 MONSTER_CLASSIC_IMAGES_RUN = ['enemy2.png']
 
+MONSTER_BOMBER_IDLE = ['bomber.png']
+
 CURSOR_IMAGE = 'cursor.png'
 CHEST_OPENED_IMG = 'chest_opened.png'
 CHEST_CLOSED_IMG = 'chest_closed.png'
@@ -40,5 +42,6 @@ LOGO_NAME = 'logo.png'
 SPLASH_IMAGE = ['splash.png']
 MONSTER_SHOTTER_IMAGES = [f'monster_classic/monster_classic{i}.png' for i in range(1, 5)]
 RESULTS_IMAGE = 'results.png'
+BOOM_IMAGES = [f'boom/boom{i}.png' for i in range(1, 6)]
 
 BACKGROUND_COLOR = (162, 152, 98)

@@ -4,7 +4,7 @@ import random
 import pygame
 
 from constants import IDLE, RUN, TILE_SIZE, SPLASH_IMAGE, PLAYER_SHOOT_COOLDOWN, DEFAULT_ENEMY_DAMAGE, ROOM_SIZE, \
-    SHOTTER_SHOOT_COOLDOWN, SANDBULLET_IMG
+    SHOTTER_SHOOT_COOLDOWN, SANDBULLET_IMG, BOOM_IMAGES
 from gui import Hit, Title
 from map_generator import borders, door_borders
 from mixer import death_fall_sound, death_wave_sound, swish_attack_sounds
@@ -226,7 +226,7 @@ class Enemy(Entity):
     # Проверяем под атакой ли существо?
     def check_damage(self, hero: Hero, arr_hit: list) -> None:
         if self.collide_splash():
-            self.get_damage(hero.damage, arr_hit, 'green')
+            self.get_damage(hero.damage, arr_hit, 'yellow')
 
     # Обновляем счетчик КД
     def do_timer(self, clock: pygame.time.Clock):
@@ -357,3 +357,59 @@ class SandBullet(Splash):
             self.hero.get_damage(self.damage, self.arr_hit, 'red')
             return True
         return False
+
+
+class Bomber(Enemy):
+    """                                         Взрывающийся враг                                   """
+
+    def __init__(self, position, speed: int, images, room_index: tuple):
+        super().__init__(position, speed, images, images, room_index)
+        self.radius = 10
+        self.damage = 20
+
+        self.timer_started = False
+        self.boom_image_index = 0
+
+    def update_enemy(self, arr, arr_hit: list, hero, clock, rooms: list):
+        player_pos = (hero.rect.x, hero.rect.y)
+
+        self.check_damage(hero, arr_hit)
+
+        if self.health_points <= 0:
+            if self.boom_image_index == len(BOOM_IMAGES):
+                self.destruct(rooms, arr)
+            elif self.timer % 10 == 0 and self.boom_image_index < len(BOOM_IMAGES):
+                self.image = pygame.transform.scale(load_image(BOOM_IMAGES[self.boom_image_index]),
+                                                    self.image_size)  # Todo: немного переделать get по индексу
+                self.boom_image_index += 1
+
+        self.do_timer(clock)
+
+        if not self.timer_started:
+            self.play_animation()
+            self.move_to_player(player_pos, rooms)
+
+        self.boom(hero, arr_hit, rooms)
+
+    def boom(self, hero: Hero, arr_hit, rooms: list) -> None:
+        if not self.timer_started:
+            first_ind, second_ind = self.room_index
+            room, room_x, room_y = rooms[first_ind][second_ind]
+            px, py = hero.rect.x, hero.rect.y
+            if (room_x < px < room_x + (ROOM_SIZE[0] - 5) * TILE_SIZE) and \
+                    (room_y < py < room_y + (ROOM_SIZE[1] - 5) * TILE_SIZE):
+                if pygame.Rect(self.rect.x - self.radius, self.rect.y - self.radius,
+                               self.rect.w + self.radius, self.rect.h + self.radius).colliderect(hero.rect):
+                    self.timer_started = True
+        else:
+            if self.timer > 600:
+                if pygame.Rect(self.rect.x - self.radius, self.rect.y - self.radius,
+                               self.rect.w + self.radius, self.rect.h + self.radius).colliderect(hero.rect):
+                    if self.health_points > 0:
+                        hero.get_damage(self.damage, arr_hit=arr_hit, color='red')
+                if self.health_points > 0:
+                    self.get_damage(self.damage, arr_hit=arr_hit, color='yellow')
+
+    def do_timer(self, clock) -> None:
+        if self.timer_started:
+            self.timer += clock.get_time()
