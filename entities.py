@@ -8,7 +8,7 @@ from constants import IDLE, RUN, TILE_SIZE, SPLASH_IMAGE, PLAYER_SHOOT_COOLDOWN,
 from gui import Hit, Title
 from map_generator import borders, door_borders
 from mixer import death_fall_sound, death_wave_sound, swish_attack_sounds
-from static_func import load_image
+from static_func import load_image, get_maximal_width
 
 all_entities = pygame.sprite.Group()  # Группа всех живых объектов
 splash_sprites = pygame.sprite.Group()  # Группа всех пуль игрока
@@ -377,6 +377,7 @@ class Bomber(Enemy):
 
         if self.health_points <= 0:
             if self.boom_image_index == len(BOOM_IMAGES):
+                self.shoot_bullets(hero, arr_hit)
                 self.destruct(rooms, arr)
             elif self.timer % 10 == 0 and self.boom_image_index < len(BOOM_IMAGES):
                 self.image = pygame.transform.scale(load_image(BOOM_IMAGES[self.boom_image_index]),
@@ -413,3 +414,13 @@ class Bomber(Enemy):
     def do_timer(self, clock) -> None:
         if self.timer_started:
             self.timer += clock.get_time()
+
+    def shoot_bullets(self, hero, arr_hit) -> None:
+        SandBullet((self.rect.x, self.rect.y), 7, images=SANDBULLET_IMG, need_pos=(0, self.rect.y),
+                   arr_hit=arr_hit, hero=hero, tile_group=sand_bullet)
+        SandBullet((self.rect.x, self.rect.y), 7, images=SANDBULLET_IMG, need_pos=(9999, self.rect.y),
+                   arr_hit=arr_hit, hero=hero, tile_group=sand_bullet)
+        SandBullet((self.rect.x, self.rect.y), 7, images=SANDBULLET_IMG, need_pos=(self.rect.x, 0),
+                   arr_hit=arr_hit, hero=hero, tile_group=sand_bullet)
+        SandBullet((self.rect.x, self.rect.y), 7, images=SANDBULLET_IMG, need_pos=(self.rect.x, 9999),
+                   arr_hit=arr_hit, hero=hero, tile_group=sand_bullet)
