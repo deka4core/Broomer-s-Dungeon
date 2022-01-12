@@ -59,7 +59,7 @@ class Entity(pygame.sprite.Sprite):
 
     # Смена спрайта анимации в зависимости от состояния
     def play_animation(self) -> None:
-        self.count_image += 0.05
+        self.count_image += 0.1
         if int(self.count_image) >= max(len(self.images_idle), len(self.images_run)):
             self.count_image = 0
 
@@ -67,8 +67,10 @@ class Entity(pygame.sprite.Sprite):
         if self.state == RUN:
             self.image = pygame.transform.scale(load_image(self.images_run[int(self.count_image)]), self.image_size)
         elif self.state == IDLE:
-            self.image = pygame.transform.scale(load_image(self.images_idle[0]),
-                                                self.image_size)  # Todo: немного переделать get по индексу
+            if int(self.count_image) >= len(self.images_idle):
+                self.count_image = 0
+            self.image = pygame.transform.scale(load_image(self.images_idle[int(self.count_image)]),
+                                                self.image_size)
 
         # Если не смотрит в нужную сторону - разворачиваем
         if not self.look_right:

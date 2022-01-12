@@ -26,11 +26,14 @@ IDLE = 0
 RUN = 1
 
 # Изображения
+
+BACKGROUND_IMAGE = 'gui/background_menu.png'
+
 PLAYER_IMAGES_IDLE = ['player/player1.png']
 PLAYER_IMAGES_RUN = [f'player/player{i}.png' for i in range(2, 5)]
 
-MONSTER_CLASSIC_IMAGES_IDLE = ['enemy2.png']
-MONSTER_CLASSIC_IMAGES_RUN = ['enemy2.png']
+MONSTER_CLASSIC_IMAGES_IDLE = [f'monster_classic/enemy_idle{i}.png' for i in range(1, 3)]
+MONSTER_CLASSIC_IMAGES_RUN = [f'monster_classic/enemy{i}.png' for i in range(1, 5)]
 
 MONSTER_BOMBER_IDLE = ['bomber.png']
 
@@ -40,7 +43,7 @@ CHEST_CLOSED_IMG = 'chest_closed.png'
 SANDBULLET_IMG = ['sand_ball.png']
 LOGO_NAME = 'logo.png'
 SPLASH_IMAGE = ['splash.png']
-MONSTER_SHOTTER_IMAGES = [f'monster_classic/monster_classic{i}.png' for i in range(1, 5)]
+MONSTER_SHOTTER_IMAGES = [f'monster_shotter/monster_classic{i}.png' for i in range(1, 5)]
 RESULTS_IMAGE = 'results.png'
 BOOM_IMAGES = [f'boom/boom{i}.png' for i in range(1, 6)]
 

@@ -1,6 +1,6 @@
 import pygame
 
-from constants import SIZE
+from constants import SIZE, BACKGROUND_IMAGE
 from dungeon import Dungeon
 from lobby import Lobby
 from menu import Menu
@@ -17,7 +17,7 @@ def main():
     running = True
     while running:
         # Открытие меню
-        Menu('background_menu.png', screen, load_image, clock)
+        Menu(BACKGROUND_IMAGE, screen, load_image, clock)
         # Открываем лобби
         Lobby([533, 534, 535, 536, 573, 574, 575, 576, 1207, 1208], clock, screen)
         # Открываем данж
