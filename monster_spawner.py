@@ -1,7 +1,7 @@
 import random
 
 from constants import TILE_SIZE, ROOM_SIZE, HERO_SPEED, MONSTER_CLASSIC_IMAGES_IDLE, MONSTER_CLASSIC_IMAGES_RUN, \
-    MONSTER_SHOTTER_IMAGES, MONSTER_BOMBER_IDLE
+    MONSTER_SHOTTER_IMAGES, MONSTER_BOMBER_IDLE, MONSTER_SHOTTER_IMAGES_SHOOT
 from entities import Enemy, ShootingEnemy, Bomber
 
 
@@ -36,7 +36,7 @@ class MonsterSpawner:
                                               images_idle=MONSTER_CLASSIC_IMAGES_IDLE,
                                               images_run=MONSTER_CLASSIC_IMAGES_RUN, room_index=(rooms.index(row),
                                                                                                  row.index(item))), ShootingEnemy((x, y), speed=HERO_SPEED - 2,
-                                                      images=MONSTER_SHOTTER_IMAGES,
+                                                      images_idle=MONSTER_SHOTTER_IMAGES, images_shoot=MONSTER_SHOTTER_IMAGES_SHOOT,
                                                       room_index=(rooms.index(row), row.index(item))), Bomber((x, y), speed=HERO_SPEED - 2,
                                                 images=MONSTER_BOMBER_IDLE,
                                                 room_index=(rooms.index(row), row.index(item)))])

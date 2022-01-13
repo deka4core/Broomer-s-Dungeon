@@ -4,7 +4,7 @@ import random
 import pygame
 
 from constants import IDLE, RUN, TILE_SIZE, SPLASH_IMAGE, PLAYER_SHOOT_COOLDOWN, DEFAULT_ENEMY_DAMAGE, ROOM_SIZE, \
-    SHOTTER_SHOOT_COOLDOWN, SANDBULLET_IMG, BOOM_IMAGES
+    SHOTTER_SHOOT_COOLDOWN, SANDBULLET_IMG, BOOM_IMAGES, SHOOT
 from gui import Hit, Title
 from map_generator import borders, door_borders
 from mixer import death_fall_sound, death_wave_sound, swish_attack_sounds
@@ -311,8 +311,9 @@ class Splash(Entity):
 class ShootingEnemy(Enemy):
     """                                         Стреляющий враг                                   """
 
-    def __init__(self, position, speed: int, images, room_index: tuple):
-        super().__init__(position, speed, images, images, room_index)
+    def __init__(self, position, speed: int, images_idle, images_shoot, room_index: tuple):
+        super().__init__(position, speed, images_idle, images_idle, room_index)
+        self.images_shoot = images_shoot
 
     # Стрельба по КД
     def shoot(self, hero: Hero, arr_hit: list, rooms: list) -> None:
@@ -324,6 +325,7 @@ class ShootingEnemy(Enemy):
                 (room_y < py < room_y + (ROOM_SIZE[1] - 5) * TILE_SIZE):
             needed_pos = (hero.rect.x, hero.rect.y)
             if self.timer > SHOTTER_SHOOT_COOLDOWN:
+                self.change_state(SHOOT)
                 SandBullet((self.rect.x, self.rect.y), 7, images=SANDBULLET_IMG, need_pos=needed_pos,
                            arr_hit=arr_hit, hero=hero, tile_group=sand_bullet)
                 self.timer = 0
@@ -338,6 +340,27 @@ class ShootingEnemy(Enemy):
 
         self.do_timer(clock)
         self.shoot(hero, arr_hit, rooms)
+
+    # Смена спрайта анимации в зависимости от состояния
+    def play_animation(self) -> None:
+        self.count_image += 0.05
+        if int(self.count_image) >= max(len(self.images_idle), len(self.images_shoot)):
+            self.count_image = 0
+
+        # Устанавливаем номер кадра
+        if self.state == SHOOT and int(self.count_image) < len(self.images_shoot):
+            self.image = pygame.transform.scale(load_image(self.images_shoot[int(self.count_image)]), self.image_size)
+        elif int(self.count_image) >= len(self.images_shoot):
+            self.change_state(IDLE)
+        elif self.state == IDLE:
+            if int(self.count_image) >= len(self.images_idle):
+                self.count_image = 0
+            self.image = pygame.transform.scale(load_image(self.images_idle[int(self.count_image)]),
+                                                self.image_size)
+
+        # Если не смотрит в нужную сторону - разворачиваем
+        if not self.look_right:
+            self.image = pygame.transform.flip(self.image, True, False)
 
 
 class SandBullet(Splash):

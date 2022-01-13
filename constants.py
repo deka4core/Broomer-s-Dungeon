@@ -24,6 +24,7 @@ CURRENT_MUSIC = 0
 # Положения анимации
 IDLE = 0
 RUN = 1
+SHOOT = 2
 
 # Изображения
 
@@ -44,6 +45,8 @@ SANDBULLET_IMG = ['sand_ball.png']
 LOGO_NAME = 'logo.png'
 SPLASH_IMAGE = ['splash.png']
 MONSTER_SHOTTER_IMAGES = [f'monster_shotter/monster_classic{i}.png' for i in range(1, 5)]
+MONSTER_SHOTTER_IMAGES_SHOOT = [f'monster_shotter/monster_shoot{i}.png' for i in range(1, 5)] + \
+                               [f'monster_shotter/monster_shoot{i}.png' for i in range(1, 5)][:1:-1]
 RESULTS_IMAGE = 'results.png'
 BOOM_IMAGES = [f'boom/boom{i}.png' for i in range(1, 6)]
 
