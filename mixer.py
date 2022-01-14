@@ -1,9 +1,19 @@
+"""! @brief Файл музыки"""
+##
+# @file mixer.py
+#
+# @brief Файл музыки
+#
+# @section description_chest Описание
+# Импорт всех звуков, музыки, метод переключения фоновой музыки.
+#
+# @section author_doxygen_example Автор(ы)
+# - Created by dekacore on 23/12/2021.
+# - Modified by dekacore on 14/01/2022.
+#
+# Copyright (c) 2022 Etherlong St.  All rights reserved.
 import pygame.mixer
 from constants import BACKGROUND_MUSICS, CURRENT_MUSIC
-
-"""
-                    Импорт звуков
-"""
 pygame.mixer.init()
 
 button_sound = pygame.mixer.Sound('data/sounds/button.wav')
@@ -20,6 +30,7 @@ pygame.mixer.music.set_endevent(pygame.USEREVENT)
 
 
 def play_next_music():
+    """Переключить фоновую мелодию на следующую"""
     global CURRENT_MUSIC
     CURRENT_MUSIC = (CURRENT_MUSIC + 1) % 3
     pygame.mixer.music.load(BACKGROUND_MUSICS[CURRENT_MUSIC])

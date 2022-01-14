@@ -1,6 +1,17 @@
-"""
-    Файл с константами
-"""
+"""! @brief Файл с константами."""
+##
+# @file constants.py
+#
+# @brief Файл с константами
+#
+# @section description_chest Описание
+# Содержит константы, облегчающие работу с программой(фото, аудио, неизменные постоянные)
+#
+# @section author_doxygen_example Автор(ы)
+# - Created by dekacore on 23/12/2021.
+# - Modified by dekacore on 13/01/2022.
+#
+# Copyright (c) 2022 Etherlong St.  All rights reserved.
 
 SIZE = WIDTH, HEIGHT = 1920, 1080
 FPS = 60
@@ -16,6 +27,7 @@ PLAYER_SHOOT_COOLDOWN = 400
 SHOTTER_SHOOT_COOLDOWN = 2000
 MONSTERS_NUMBER = 5
 DEFAULT_ENEMY_DAMAGE = 5
+BACKGROUND_COLOR = (162, 152, 98)
 
 # Музыка
 BACKGROUND_MUSICS = [f'data/music/theme{i}.mp3' for i in range(1, 4)]
@@ -27,17 +39,12 @@ RUN = 1
 SHOOT = 2
 
 # Изображения
-
 BACKGROUND_IMAGE = 'gui/background_menu.png'
-
 PLAYER_IMAGES_IDLE = ['player/player1.png']
 PLAYER_IMAGES_RUN = [f'player/player{i}.png' for i in range(2, 5)]
-
 MONSTER_CLASSIC_IMAGES_IDLE = [f'monster_classic/enemy_idle{i}.png' for i in range(1, 3)]
 MONSTER_CLASSIC_IMAGES_RUN = [f'monster_classic/enemy{i}.png' for i in range(1, 5)]
-
 MONSTER_BOMBER_IDLE = ['bomber.png']
-
 CURSOR_IMAGE = 'cursor.png'
 CHEST_OPENED_IMG = 'chest_opened.png'
 CHEST_CLOSED_IMG = 'chest_closed.png'
@@ -49,5 +56,3 @@ MONSTER_SHOTTER_IMAGES_SHOOT = [f'monster_shotter/monster_shoot{i}.png' for i in
                                [f'monster_shotter/monster_shoot{i}.png' for i in range(1, 5)][:1:-1]
 RESULTS_IMAGE = 'results.png'
 BOOM_IMAGES = [f'boom/boom{i}.png' for i in range(1, 6)]
-
-BACKGROUND_COLOR = (162, 152, 98)

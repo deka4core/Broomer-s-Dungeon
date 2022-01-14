@@ -1,8 +1,20 @@
+"""! @brief Файл генератора карты"""
+##
+# @file map_generator.py
+#
+# @brief Файл генератора карты
+#
+# @section description_chest Описание
+# Класс генератора карты, карты, дверей, комнат и всех типов тайлов.
+#
+# @section author_doxygen_example Автор(ы)
+# - Created by dekacore on 25/12/2021.
+# - Modified by dekacore on 14/01/2022.
+#
+# Copyright (c) 2022 Etherlong St.  All rights reserved.
 import random
-
 import pygame
 import pytmx
-
 from chest import all_tiles, spawn_chest
 from constants import MAPS_DIR, MAP_MAX_WIDTH, MAP_MAX_HEIGHT, ROOM_SIZE, TILE_SIZE, ROOM_NUMBER
 from static_func import less, more
@@ -14,14 +26,20 @@ default_tiles = pygame.sprite.Group()  # все другие свободные 
 
 
 class MapGenerator:
+    """Класс генератора карты
+
+    Создание начальной комнаты и других, определение соседей, постройка необходимых проходов между ними."""
     def __init__(self, screen):
+        """Инициализация"""
         self.spawned_rooms = []
         self.ROOM_MAPS = []  # список карт всех комнат
         self.screen = screen
         self.start()
 
-    # При запуске
     def start(self):
+        """Происходит при запуске
+
+        Создание начальной комнаты и пустой карты, её дальнейшее заполнение."""
         self.ROOM_MAPS = [pytmx.load_pygame(f'{MAPS_DIR}/map{i}.tmx') for i in range(1, 4)]
         self.spawned_rooms = [[-1] * MAP_MAX_WIDTH for i in range(MAP_MAX_HEIGHT)]
 
@@ -43,8 +61,8 @@ class MapGenerator:
                     room = self.spawned_rooms[x][y][0]
                     self.connect_room(room, (x, y))
 
-    # Строит проход между двумя комнатами
     def build_passage_to(self, position, map_position, door, map):
+        """Создает проход промеж двух соседей"""
         x, y = position
         map_x, map_y = map_position
         if not door.is_builded():
@@ -63,8 +81,8 @@ class MapGenerator:
         image = pygame.transform.scale(image, (TILE_SIZE, TILE_SIZE))
         Tile((x * TILE_SIZE + map_x, y * TILE_SIZE + map_y), image, default_tiles)
 
-    # Генерация комнат
     def place_one_room(self):
+        """Генерация комнат"""
         vacantPlaces = set()  # Свободные места
         for x in range(len(self.spawned_rooms)):
             for y in range(len(self.spawned_rooms[0])):
@@ -92,8 +110,8 @@ class MapGenerator:
         # Выставляем комнату на её место в списке
         self.spawned_rooms[position[0]][position[1]] = (newRoom, room_x, room_y)
 
-    # Cоединяем комнаты проходом
     def connect_room(self, room, position):
+        """Разрешает постройку прохода между комнатами"""
         # макс.индекс комнаты по X и Y
         max_x = len(self.spawned_rooms) - 1
         max_y = len(self.spawned_rooms[0]) - 1
@@ -138,15 +156,18 @@ class MapGenerator:
                         self.room_at(room_x - 1, room_y).DoorR.open_state()
 
     def room_at(self, x, y):
+        """Возвращает комнату из списка карты по её координатам"""
         return self.spawned_rooms[x][y][0]
 
     def check_room(self, x, y) -> bool:
+        """Проверка на существование комнаты по координатам (x, y)"""
         return self.spawned_rooms[x][y] != -1
 
 
 class Door:
-    """            Класс двери            """
+    """Класс двери"""
     def __init__(self, free_tiles_coords, not_free_tiles_coords, borders_tiles):
+        """Инициализация"""
         self.f_tiles = free_tiles_coords
         self.nf_tiles = not_free_tiles_coords
         self.borders_tiles = borders_tiles
@@ -154,29 +175,35 @@ class Door:
         self.opened = False
         self.already_done = False
 
-    # Можно построить?
     def is_open(self) -> bool:
+        """Можно построить?"""
         return self.opened
 
-    # Разрешить строительство
     def open_state(self) -> None:
+        """Разрешить строительство"""
         self.opened = True
 
     def close_state(self) -> None:
+        """Запретить строительство"""
         self.opened = False
 
-    # Построить проход
     def build_passage(self) -> None:
+        """Построить проход
+
+        Изменяем переменную построенной двери"""
         self.already_done = not self.already_done
 
-    # Уже построена?
     def is_builded(self) -> bool:
+        """Уже построена?"""
         return self.already_done
 
 
 class Room:
-    """            Класс комнаты            """
+    """Класс комнаты
+
+    Имеет 4 двери"""
     def __init__(self, size, map):
+        """Инициализация"""
         self.x, self.y = size
         self.map = map
 
@@ -196,26 +223,31 @@ class Room:
         self.have_monsters = True
         self.mobs = []
 
-    # Закрыть комнату
     def block(self):
+        """Блокировка дверей"""
         for door in self.Doors:
             if door.is_builded():
                 door.close_state()
 
-    # Открыть комнату
     def unblock(self):
+        """Разблокировка дверей"""
         for door in self.Doors:
             if door.is_builded():
                 door.open_state()
 
-    # Открыта ли?
-    def is_opened(self):
+    def is_opened(self) -> bool:
+        """Открыта ли комната?"""
         return any([self.DoorU.is_open(), self.DoorD.is_open(), self.DoorR.is_open(), self.DoorL.is_open()])
 
 
 class Tile(pygame.sprite.Sprite):
-    """           Класс тайла                """
+    """Класс тайла
+
+    По нему можно ходить."""
     def __init__(self, position, image, tile_group):
+        """Инициализация
+
+        Добавление в группы тайлов"""
         super().__init__(all_tiles)
         self.x, self.y = position
         self.image = image
@@ -224,29 +256,32 @@ class Tile(pygame.sprite.Sprite):
 
 
 class BorderTile(Tile):
-    """    Класс тайла на который нельзя наступать       """
+    """Класс тайла на который нельзя наступать"""
     def __init__(self, position, image, group_tile):
         super().__init__(position, image, group_tile)
 
 
 class Map:
-    """                 Класс карты                       """
+    """Класс карты"""
     def __init__(self, free_tiles, screen):
+        """Инициализация"""
         self.generator = MapGenerator(screen)
         maps = self.generator.spawned_rooms
         self.free_tiles = free_tiles
         self.sort_tiles(maps)
 
-    # узнаем ID тайла из тайлсета
     def get_tile_id(self, position, map_):
+        """Получить ID тайла из Tileset'а"""
         return map_.tiledgidmap[map_.get_tile_gid(*position, layer=0)]
 
-    # Можно ли наступать на клетку?
     def is_free(self, position, map_) -> bool:
+        """Можно ли наступать на клетку?"""
         return self.get_tile_id(position, map_) in self.free_tiles
 
-    # Сортировка тайлов и проходов
     def sort_tiles(self, maps: list):
+        """Сортировка тайлов и проходов
+
+        Очистка мусора, отрисовка новых тайлов"""
         for border in borders:
             border.kill()
         for tile in default_tiles:
@@ -276,6 +311,7 @@ class Map:
                                     Tile((x * TILE_SIZE + map_x, y * TILE_SIZE + map_y), image, default_tiles)
 
     def check_player_room(self, player):
+        """Есть ли игрок в комнате?"""
         rooms = self.generator.spawned_rooms
         for row in rooms:
             for item in row:
