@@ -3,4 +3,7 @@
 
 Чтобы начать играть вы можете склонировать мой репозиторий и установить необходимые модули в requirements.txt введя команду в терминал: pip install -r requirements.txt (Если вы на OS Windows)
 
+Для подробной документация по куоду вы можете открыть файл index.html в директории data/html:
+data/html/index.html
+
 Copyright (c) 2022 Etherlong St. All rights reserved.
