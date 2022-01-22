@@ -35,10 +35,6 @@ class Camera(object):
 
     def update(self, target, sides_minmax=None):
         """Обновить положение камеры
-
-        :param target: Hero
-        :param sides_minmax: None
-        :return: None
         """
         if sides_minmax is None:
             sides_minmax = [static_func.get_minimal_width(self.rooms),
@@ -49,13 +45,7 @@ class Camera(object):
 
 
 def camera_configure(camera, target_rect, sides_minmax) -> pygame.Rect:
-    """Метод конфигурации камеры
-
-    :param camera: Camera
-    :param target_rect: pygame.Rect
-    :param sides_minmax: list
-    :return: pygame.Rect
-    """
+    """Метод конфигурации камеры"""
     left, top = target_rect[0], target_rect[1]
     width, height = camera[-2], camera[-1]
     left, top = -left + WIDTH / 2, -top + HEIGHT / 2

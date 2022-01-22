@@ -18,7 +18,7 @@ import sys
 import pygame
 
 
-def load_image(name) -> pygame.image:
+def load_image(name: str) -> pygame.image:
     """Загрузка изображения"""
     fullname = os.path.join('data', name)
     if not os.path.isfile(fullname):
