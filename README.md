@@ -1,4 +1,7 @@
-﻿# Broomer-s-Dungeon
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/deka4core/Broomer-s-Dungeon.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/deka4core/Broomer-s-Dungeon/alerts/)
+[![Total alerts](https://img.shields.io/lgtm/alerts/g/deka4core/Broomer-s-Dungeon.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/deka4core/Broomer-s-Dungeon/alerts/)
+
+# Broomer-s-Dungeon
 Классический RPG Rogue-Like инди-проект с видом сверху. Игрок проходит комнаты с разными врагами - Бомбер, Бегун, Стреляющий Монстр - и получает за успешное прохождение награды в виде монет. К каждому врагу нужно применять особую тактику. Например, от Бегуна стоит держаться подальше и стрелять по нему издалека. Если игрок находится в помещении, двери закрываются, это сделано для более интересного процесса, во избежание нечестной игры.
 
 Чтобы начать играть вы можете склонировать мой репозиторий и установить необходимые модули в requirements.txt введя команду в терминал: pip install -r requirements.txt (Если вы на OS Windows)
